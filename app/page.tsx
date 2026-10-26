@@ -9,11 +9,9 @@ import Lab from "./components/Lab";
 import PulseChain from "./components/PulseChain";
 import Zoomable from "./components/Zoomable";
 import Toolkit from "./components/Toolkit";
-import LivingCanvas from "./components/LivingCanvas";
 import { asset } from "./lib/asset";
 import ContactLauncher from "./components/ContactLauncher";
-import LaneField from "./components/LaneField";
-import Vitrine from "./components/Vitrine";
+import HelixField from "./components/HelixField";
 import AeternusDock from "./components/AeternusDock";
 import ShelfLife from "./components/ShelfLife";
 import { ResumePicker } from "./components/RoleMatch";
@@ -49,8 +47,7 @@ const heroStats = [
 export default function Home() {
   return (
     <>
-      <LaneField />
-      <Vitrine />
+      <HelixField />
       <Intro />
       <SiteNav />
       <AeternusDock />
@@ -84,7 +81,7 @@ export default function Home() {
           </div>
 
           <StatCards stats={heroStats} />
-          <p className="hero-hint" aria-hidden="true">Move across the blueprint to light up the lanes · click open space to dispatch a shipment · <a href="#match">hiring? open AETERNUS →</a></p>
+          <p className="hero-hint" aria-hidden="true">This strand is my DNA: hover a base pair to read it · drag open space to turn the helix · <a href="#match">hiring? open AETERNUS →</a></p>
           <PulseChain />
         </section>
 
@@ -270,7 +267,6 @@ export default function Home() {
 
         {/* 13 — CONTACT */}
         <section id="contact" className="chapter dark contact">
-          <div className="contact-backdrop" aria-hidden="true"><LivingCanvas mode="sphere" /></div>
           <p className="chapter-label reveal"><span>13</span>The next chapter</p>
           <h2 className="contact-title reveal">Let’s build <em>what’s next.</em></h2>
           <p className="lede reveal">Exploring full-time opportunities in healthcare, life sciences, supply chain, and analytics beginning in early 2027.</p>

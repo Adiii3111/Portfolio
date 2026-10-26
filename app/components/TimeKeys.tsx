@@ -39,17 +39,11 @@ function setMood(time: Time, mode: "auto" | "manual", from?: HTMLElement) {
   try { localStorage.setItem("aks-time", mode === "auto" ? "auto" : time); } catch {}
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!from || !document.startViewTransition || reduced || root.dataset.time === time) return apply();
-  // The new mood comes in through a set of blinds that tilt open slat by slat (see .vt-blinds
-  // in globals.css): top-down when moving later in the day, like the sun going down; bottom-up
-  // when moving earlier, like it coming up.
-  const order: Time[] = ["morning", "afternoon", "evening", "night"];
-  const later = order.indexOf(time) > order.indexOf((root.dataset.time as Time) ?? "night");
-  root.classList.add("vt-blinds");
-  root.dataset.vtDir = later ? "down" : "up";
-  document.startViewTransition(apply).finished.finally(() => {
-    root.classList.remove("vt-blinds");
-    delete root.dataset.vtDir;
-  });
+  // Each mood arrives its own way (see "Mood transitions" in globals.css): morning rises from
+  // the bottom like dawn, afternoon flares in like midday glare, evening sinks the old page
+  // like a setting sun, night closes the lights in from the edges.
+  root.dataset.vt = time;
+  document.startViewTransition(apply).finished.finally(() => { delete root.dataset.vt; });
 }
 
 export default function TimeKeys() {

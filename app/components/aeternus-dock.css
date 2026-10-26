@@ -1,25 +1,20 @@
 /* AETERNUS dock — every class is prefixed ae- */
 
-/* Launcher: a plain machined circle with the AETERNUS mark turning inside. */
-.ae-launch { position: fixed; right: 22px; bottom: 22px; z-index: 140; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent) 18%, var(--bg)), color-mix(in srgb, var(--bg) 80%, #000)); box-shadow: 0 14px 30px -8px #0009, inset 0 1px 0 color-mix(in srgb, var(--accent) 30%, transparent); transition: transform .35s var(--ease), border-color .3s; }
-.ae-launch::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); animation: ae-ring 3.6s ease-out infinite; pointer-events: none; }
-.ae-launch:hover { transform: translateY(-3px) scale(1.04); border-color: var(--accent); }
-.ae-launch:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+/* Launcher: an angular, machined plate rather than a chat bubble. */
+.ae-launch { position: fixed; right: 22px; bottom: 22px; z-index: 140; isolation: isolate; display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); background: color-mix(in srgb, var(--accent) 55%, transparent); color: var(--fg); filter: drop-shadow(0 16px 30px #0009); transition: transform .35s var(--ease), background .3s; }
+/* 1px machined edge: the plate sits inside a slightly larger chamfered outline. */
+.ae-launch::after { content: ""; position: absolute; inset: 1px; z-index: -2; clip-path: polygon(11.5px 0, 100% 0, 100% calc(100% - 11.5px), calc(100% - 11.5px) 100%, 0 100%, 0 11.5px); background: linear-gradient(135deg, color-mix(in srgb, var(--bg) 70%, #000), var(--bg)); }
+.ae-launch::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 70%); background-size: 250% 100%; animation: ae-sweep 4.5s ease-in-out infinite; pointer-events: none; z-index: -1; }
+.ae-launch:hover { transform: translateY(-3px); background: var(--accent); }
 .ae-launch.is-open { opacity: 0; pointer-events: none; }
-.ae-launch.is-launching { animation: ae-kick .5s var(--ease); }
-.ae-launch.is-launching::after { animation: ae-ring .6s ease-out; }
-.ae-mark { width: 24px; height: 24px; fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; animation: ae-turn 12s linear infinite; }
-
-/* Launch: the dragon leaves the circle wings folded, climbs to the centre, opens its wings,
-   beats twice, then AETERNUS is written under it and the panel takes over. */
-.ae-flight { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; align-content: center; pointer-events: none; animation: ae-flight-out .35s ease 1.55s forwards; }
-.ae-flight::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 55%), #04070c99; opacity: 0; animation: ae-fade .5s ease .6s forwards; }
-.ae-flyer { position: relative; width: min(440px, 78vw); animation: ae-fly 1.05s cubic-bezier(.45, .05, .25, 1) both; }
-.ae-dragon { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 45%, transparent)); }
-.ae-dragon .ae-body, .ae-wing > path:not(.ae-bone) { fill: var(--accent); }
-.ae-bone { fill: none; stroke: color-mix(in srgb, var(--bg) 80%, #000); stroke-width: 2.2; stroke-linecap: round; opacity: .7; }
-.ae-wing { transform-box: fill-box; transform-origin: 1% 46%; animation: ae-unfurl 1.35s cubic-bezier(.3, .1, .3, 1) both; }
-.ae-flight-word { position: relative; margin-top: 22px; font: 600 clamp(20px, 3.4vw, 34px)/1 var(--serif); letter-spacing: .5em; padding-left: .5em; color: var(--accent); opacity: 0; animation: ae-word .5s var(--ease) 1.05s forwards; }
+.ae-mark { display: grid; place-items: center; width: 36px; height: 36px; background: color-mix(in srgb, var(--accent) 14%, transparent); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+/* The mark is an infinity (AETERNUS: timeless); a point of light runs round it forever. */
+.ae-mark svg { width: 26px; height: 26px; fill: none; stroke: color-mix(in srgb, var(--accent) 55%, transparent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.ae-mark .ae-trace { stroke: var(--accent); stroke-width: 2.2; stroke-dasharray: .16 .84; animation: ae-trace 3.2s linear infinite; filter: drop-shadow(0 0 2px var(--accent)); }
+.ae-launch:hover .ae-trace { animation-duration: 1.2s; }
+.ae-word { display: grid; gap: 2px; text-align: left; }
+.ae-word b { font: 600 13px/1 var(--serif); letter-spacing: .38em; color: var(--accent); }
+.ae-word i { font: 500 10.5px/1.2 var(--sans); font-style: normal; letter-spacing: .06em; color: var(--muted); }
 
 /* Panel: opens over the page. */
 .ae-backdrop { position: fixed; inset: 0; z-index: 145; background: #04070ccc; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: ae-fade .25s ease; }
@@ -41,31 +36,14 @@
 .ae-body { overflow-y: auto; padding: clamp(18px, 3vw, 34px); overscroll-behavior: contain; }
 html.aeternus-open { overflow: hidden; }
 
-@keyframes ae-ring { 0% { transform: scale(.9); opacity: .9; } 70%, 100% { transform: scale(1.35); opacity: 0; } }
-@keyframes ae-kick { 30% { transform: scale(.88); } 100% { transform: none; } }
-/* --x0/--y0: the launcher's offset from the viewport centre, set on click. */
-@keyframes ae-fly {
-  0% { transform: translate(var(--x0), var(--y0)) scale(.08) rotate(-35deg); opacity: 0; }
-  12% { opacity: 1; }
-  55% { transform: translate(calc(var(--x0) * .3), calc(var(--y0) * .2 - 40px)) scale(.62) rotate(-12deg); }
-  100% { transform: none; opacity: 1; }
-}
-@keyframes ae-unfurl {
-  0%, 25% { transform: rotate(62deg) scale(.22, .5); }
-  52% { transform: none; }
-  64% { transform: rotate(-10deg) scale(1, .58); }
-  76% { transform: rotate(6deg); }
-  88% { transform: rotate(-8deg) scale(1, .64); }
-  100% { transform: none; }
-}
-@keyframes ae-word { from { opacity: 0; letter-spacing: .2em; transform: translateY(10px); } to { opacity: 1; letter-spacing: .5em; transform: none; } }
-@keyframes ae-flight-out { to { opacity: 0; transform: scale(1.06); } }
-@keyframes ae-turn { to { transform: rotate(360deg); } }
+@keyframes ae-sweep { 0%, 100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
+@keyframes ae-trace { to { stroke-dashoffset: -1; } }
 @keyframes ae-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ae-in { from { opacity: 0; transform: translate(-50%, calc(-50% + 18px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
 
 @media (max-width: 560px) {
-  .ae-launch { right: 14px; bottom: 14px; width: 52px; height: 52px; }
+  .ae-launch { right: 12px; bottom: 12px; padding: 8px 10px 8px 8px; }
+  .ae-word i { display: none; }
   .ae-panel { top: auto; bottom: 0; left: 0; width: 100%; max-height: 92svh; transform: none; clip-path: none; padding: 1px 0 0; animation: ae-up .35s var(--ease); }
   .ae-inner { clip-path: none; }
   .ae-bar { flex-wrap: wrap; padding: 12px 14px; gap: 10px; }
@@ -76,6 +54,6 @@ html.aeternus-open { overflow: hidden; }
 }
 @keyframes ae-up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .ae-launch::after, .ae-mark { animation: none; }
+  .ae-launch::before, .ae-mark .ae-trace { animation: none; }
   .ae-panel, .ae-backdrop { animation: none; }
 }
