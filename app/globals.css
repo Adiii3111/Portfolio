@@ -194,6 +194,34 @@ html[data-intro="done"] .intro { display: none; }
 .tk-auto { width: auto; padding: 0 10px 0 9px; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .tk-auto .tk-led { position: static; display: inline-block; margin-left: 6px; vertical-align: 1px; }
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+/* Mood change: the new mood shows through slats that tilt open from their centre lines,
+   while a soft front travels down (or up) the screen so the blinds open in sequence. */
+@property --vt-blind { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+@property --vt-sweep { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+html.vt-blinds::view-transition-new(root) {
+  --slat: clamp(36px, 6.5vh, 64px);
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent calc(50% - var(--vt-blind) / 2), #000 calc(50% - var(--vt-blind) / 2), #000 calc(50% + var(--vt-blind) / 2), transparent calc(50% + var(--vt-blind) / 2)),
+    linear-gradient(var(--vt-dir, to bottom), #000 calc(var(--vt-sweep) - 30%), transparent var(--vt-sweep));
+  mask-image:
+    linear-gradient(to bottom, transparent calc(50% - var(--vt-blind) / 2), #000 calc(50% - var(--vt-blind) / 2), #000 calc(50% + var(--vt-blind) / 2), transparent calc(50% + var(--vt-blind) / 2)),
+    linear-gradient(var(--vt-dir, to bottom), #000 calc(var(--vt-sweep) - 30%), transparent var(--vt-sweep));
+  -webkit-mask-size: 100% var(--slat), 100% 100%;
+  mask-size: 100% var(--slat), 100% 100%;
+  -webkit-mask-repeat: repeat-y, no-repeat;
+  mask-repeat: repeat-y, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  animation: vt-blinds 1.1s cubic-bezier(.55, .1, .25, 1) both;
+}
+html.vt-blinds[data-vt-dir="up"]::view-transition-new(root) { --vt-dir: to top; }
+html.vt-blinds::view-transition-old(root) { animation: vt-dim 1.1s ease both; }
+@keyframes vt-blinds {
+  0% { --vt-blind: 0%; --vt-sweep: 0%; }
+  70% { --vt-blind: 100%; }
+  100% { --vt-blind: 101%; --vt-sweep: 135%; }
+}
+@keyframes vt-dim { to { filter: brightness(.72) saturate(.85); } }
 .brand { display: flex; align-items: center; margin-right: auto; }
 /* AKS monogram: strokes draw in on open, then a unit runs the route to the red terminal. */
 .monogram { display: block; width: 62px; height: auto; overflow: visible; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
