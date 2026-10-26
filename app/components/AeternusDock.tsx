@@ -17,6 +17,7 @@ type Tab = "ask" | "match";
 export default function AeternusDock() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("ask");
+  const [launching, setLaunching] = useState(false);
   const launcher = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
 
@@ -42,6 +43,14 @@ export default function AeternusDock() {
     field?.focus({ preventScroll: true });
   }, [open, tab]);
 
+  // The dragon takes off first, then the panel opens behind it.
+  const launch = () => {
+    if (open || launching) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setOpen(true); return; }
+    setLaunching(true);
+    window.setTimeout(() => { setOpen(true); setLaunching(false); }, 520);
+  };
+
   const close = () => { setOpen(false); launcher.current?.focus({ preventScroll: true }); };
 
   // Arrow keys move between the two tabs.
@@ -54,9 +63,9 @@ export default function AeternusDock() {
 
   return (
     <>
-      <button ref={launcher} className={`ae-launch ${open ? "is-open" : ""}`} onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="aeternus" aria-label="Open AETERNUS — ask anything about Aditya">
+      <button ref={launcher} className={`ae-launch ${open ? "is-open" : ""} ${launching ? "is-launching" : ""}`} onClick={launch} aria-expanded={open} aria-controls="aeternus" aria-label="Open AETERNUS — ask anything about Aditya">
         <span className="ae-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M12 2 21 7v10l-9 5-9-5V7Z" /><path d="M12 7v10M7.5 9.5l9 5M16.5 9.5l-9 5" /></svg>
+          <Dragon />
         </span>
         <span className="ae-word"><b>AETERNUS</b><i>Ask me anything</i></span>
         <kbd aria-hidden="true">/</kbd>
@@ -96,5 +105,23 @@ export default function AeternusDock() {
         </div>
       </div>
     </>
+  );
+}
+
+/* AETERNUS's mark: a dragon in flight, cut like a tattoo, breathing fire. */
+function Dragon() {
+  return (
+    <svg className="ae-dragon" viewBox="-4 -4 138 72">
+      <g className="ae-dragon-body">
+        <path d="M92 22 C86 26 82 30 76 32 C68 35 60 37 52 39 C42 41 34 46 28 52 C22 58 14 60 8 56 C16 64 26 62 33 56 C40 50 48 47 56 47 C64 47 72 44 80 40 C86 36 90 32 94 28 Z" />
+        <path d="M10 55 L0 49 L4 57 L-1 65 L10 59 Z" />
+        <path d="M92 22 C94 16 98 13 103 13 L115 15 L106 19 L111 21.5 L100 24 C97 27 95 28 94 28 Z" />
+        <path d="M96 14 L85 4 L99 12 Z M100.5 13 L97 2 L104 12.5 Z" />
+        <path className="ae-dragon-wing" d="M74 32 C72 22 70 12 66 5 L28 1 C39 9 42 13 35 17 C46 19 50 23 43 29 C52 31 56 35 58 40 Z" />
+        <path d="M77 40 L80 47 L77 47 L83 52 L84 47 L87 51 L85 44 Z M55 46 L53 54 L50 54 L54 59 L56 55 L58 59 L58 51 Z" />
+      </g>
+      <path className="ae-dragon-cut" d="M66 6 L35 17 M66 6 L43 29 M66 6 L56 38 M40 46 C48 43 56 42 64 41 M30 54 C34 51 37 49 41 47" />
+      <path className="ae-dragon-fire" d="M102 15.5 L105 16 L102.5 17.4 Z M114 19 C119 17 124 15 130 15 C125 18 122 20 120 23 C124 22 127 23 130 25 C124 26 118 25 112 22 Z" />
+    </svg>
   );
 }

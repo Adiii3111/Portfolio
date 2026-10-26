@@ -554,7 +554,9 @@ export function ask(question: string, idx: Index, ctx: Context): Answer {
   ranked = ranked.filter((r) => r.s >= top * 0.42);
   const lead = ranked[0].p;
   const same = ranked.filter((r) => r.p.topic === lead.topic).map((r) => r.p);
-  const other = ranked.filter((r) => r.p.topic !== lead.topic).map((r) => r.p);
+  // When the answer is about one employer, don't pad it with a different employer's work.
+  const EMPLOYERS = ["vaxxinova", "nobroker", "greaves", "nakshatra", "mtr"];
+  const other = ranked.filter((r) => r.p.topic !== lead.topic && !(EMPLOYERS.includes(lead.topic) && EMPLOYERS.includes(r.p.topic))).map((r) => r.p);
   return compose([...same.slice(0, 3), ...other.slice(0, 2)], ctx);
 }
 

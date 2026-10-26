@@ -1,21 +1,19 @@
 /*
- * The AKS monogram, drawn as one supply route: the A is a peak, the K branches off it
- * like a supply split, the S flows out to a delivery point (the red terminal). It
+ * The AKS monogram, one symbol per discipline: the A is an engineering truss, the K is a
+ * supply line splitting in two (with a node at each end), and the S is a heartbeat. It
  * draws itself in when the page opens.
  */
 export default function Monogram({ className = "" }: { className?: string }) {
   return (
-    <svg className={`monogram ${className}`} viewBox="0 0 70 40" role="img" aria-label="AKS — Aditya Kadlabal Sripad">
+    <svg className={`monogram ${className}`} viewBox="0 0 150 66" role="img" aria-label="AKS — Aditya Kadlabal Sripad">
       <g className="mg-letters">
-        <path pathLength={1} d="M3 33 L13.5 5 L24 33" />
-        <path pathLength={1} d="M7.6 22.5 H19.4" />
-        <path pathLength={1} d="M30 5 V33" />
-        <path pathLength={1} d="M30 21 L43 5" />
-        <path pathLength={1} d="M34.2 16 L44 33" />
-        <path pathLength={1} d="M64 8.5 C60.5 4.5 50 4.2 50 11.6 C50 19.2 64.6 16.6 64.6 25.4 C64.6 33.6 53 35 49.4 29.6" />
+        <path className="mg-a" pathLength={1} d="M6 60 L24 10 L42 60 Z" />
+        <path className="mg-k" pathLength={1} d="M58 10 V60" />
+        <path className="mg-k" pathLength={1} d="M58 37 L84 12 M66 30 L84 60" />
+        <path className="mg-s" pathLength={1} d="M100 35 H108 L112 26 L118 46 L123 14 L129 56 L134 35 H146" />
       </g>
-      <path className="mg-route" pathLength={1} d="M1 38 H58" />
-      <rect className="mg-node" x="58.5" y="35.5" width="5" height="5" />
+      <rect className="mg-node" x="80" y="8" width="8" height="8" />
+      <rect className="mg-node" x="80" y="56" width="8" height="8" />
     </svg>
   );
 }

@@ -12,7 +12,7 @@ import Toolkit from "./components/Toolkit";
 import LivingCanvas from "./components/LivingCanvas";
 import { asset } from "./lib/asset";
 import ContactLauncher from "./components/ContactLauncher";
-import LaneField from "./components/LaneField";
+import HelixField from "./components/HelixField";
 import AeternusDock from "./components/AeternusDock";
 import ShelfLife from "./components/ShelfLife";
 import { ResumePicker } from "./components/RoleMatch";
@@ -48,7 +48,7 @@ const heroStats = [
 export default function Home() {
   return (
     <>
-      <LaneField />
+      <HelixField />
       <Intro />
       <SiteNav />
       <AeternusDock />
