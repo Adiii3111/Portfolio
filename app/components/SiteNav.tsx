@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import TimeKeys from "./TimeKeys";
+import Monogram from "./Monogram";
 import { person, sections } from "../content";
 import ContactLauncher from "./ContactLauncher";
 
-const headerLinks = ["about", "journey", "experience", "work", "research", "lab", "running", "contact"];
+const headerLinks = ["about", "journey", "experience", "work", "research", "lab", "contact"];
 
 export default function SiteNav() {
   const [active, setActive] = useState("top");
-  const [theme, setTheme] = useState("dark");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -21,14 +22,9 @@ export default function SiteNav() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    // Which chapter is under the header line → active link + header colouring.
+    // Which chapter is under the header line → active link.
     const spy = new IntersectionObserver(
-      (entries) => entries.forEach((e) => {
-        if (!e.isIntersecting) return;
-        const el = e.target as HTMLElement;
-        setActive(el.id);
-        setTheme(el.dataset.theme ?? "dark");
-      }),
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); }),
       { rootMargin: "-40px 0px -85% 0px" },
     );
     sections.forEach((s) => { const el = document.getElementById(s.id); if (el) spy.observe(el); });
@@ -53,11 +49,13 @@ export default function SiteNav() {
 
   return (
     <>
-      <div className="progress" style={{ transform: `scaleX(${progress})` }} aria-hidden="true" />
-      <header className={`site-header ${scrolled ? "is-scrolled" : ""} theme-${open ? "dark" : theme}`}>
+      <div className="tracker" aria-hidden="true">
+        <span className="tracker-fill" style={{ transform: `scaleX(${progress})` }} />
+        <span className="tracker-vial" style={{ left: `${progress * 100}%` }}><svg viewBox="0 0 12 24"><path d="M3 1h6M4 1v16a2 2 0 0 0 4 0V1" /><path className="tracker-blood" d="M4 10h4v7a2 2 0 0 1-4 0Z" /></svg></span>
+      </div>
+      <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
         <a className="brand" href="#top" aria-label={`${person.fullName} — back to top`}>
-          <span className="brand-mark">AKS</span>
-          <span className="brand-name">{person.fullName}</span>
+          <Monogram />
         </a>
         <nav className="header-nav" aria-label="Primary">
           {headerLinks.map((id) => {
@@ -65,6 +63,7 @@ export default function SiteNav() {
             return <a key={id} href={`#${id}`} aria-current={active === id ? "true" : undefined}>{s.short}</a>;
           })}
         </nav>
+        <TimeKeys />
         <ContactLauncher className="header-cta">Connect</ContactLauncher>
         <button className="menu-toggle" aria-expanded={open} aria-controls="site-menu" onClick={() => setOpen(!open)}>
           <span>{open ? "Close" : "Menu"}</span>
@@ -84,7 +83,7 @@ export default function SiteNav() {
         <p>{person.email}<br />{person.collegeEmail}</p>
       </div>
 
-      <nav className={`chapter-rail theme-${theme}`} aria-label="Chapters">
+      <nav className="chapter-rail" aria-label="Chapters">
         {sections.map((s, i) => (
           <a key={s.id} href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}>
             <span className="rail-label">{String(i + 1).padStart(2, "0")} · {s.label}</span>

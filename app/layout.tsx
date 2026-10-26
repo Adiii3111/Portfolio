@@ -20,11 +20,18 @@ export const metadata: Metadata = {
     "From Bengaluru to Boston — Aditya Kadlabal Sripad connects engineering, healthcare, supply chains, analytics, and research.",
 };
 
-export const viewport: Viewport = { themeColor: "#0B1423" };
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0A1322" },
+    { media: "(prefers-color-scheme: light)", color: "#F5F1E9" },
+  ],
+};
 
 // Runs before first paint: skip the opening sequence for returning visitors
 // in this tab session and for anyone who prefers reduced motion.
-const introScript = `try{if(sessionStorage.getItem("aks-intro")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.dataset.intro="done"}catch(e){}`;
+// Also picks the time-of-day mood (a saved choice, else the visitor's clock) so there's no flash.
+// morning + afternoon use the light tone, evening + night the dark tone.
+const introScript = `try{if(sessionStorage.getItem("aks-intro")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.dataset.intro="done"}catch(e){}var m;try{m=localStorage.getItem("aks-time")}catch(e){}var h=new Date().getHours(),t=/^(morning|afternoon|evening|night)$/.test(m)?m:h>=5&&h<11?"morning":h>=11&&h<17?"afternoon":h>=17&&h<20?"evening":"night",d=document.documentElement.dataset;d.time=t;d.timeMode=m&&m!=="auto"?"manual":"auto";d.theme=t==="morning"||t==="afternoon"?"light":"dark";`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

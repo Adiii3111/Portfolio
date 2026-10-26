@@ -1,0 +1,57 @@
+/* AETERNUS dock — every class is prefixed ae- */
+
+/* Launcher: an angular, machined plate rather than a chat bubble. */
+.ae-launch { position: fixed; right: 22px; bottom: 22px; z-index: 140; isolation: isolate; display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); background: color-mix(in srgb, var(--accent) 55%, transparent); color: var(--fg); filter: drop-shadow(0 16px 30px #0009); transition: transform .35s var(--ease), background .3s; }
+/* 1px machined edge: the plate sits inside a slightly larger chamfered outline. */
+.ae-launch::after { content: ""; position: absolute; inset: 1px; z-index: -2; clip-path: polygon(11.5px 0, 100% 0, 100% calc(100% - 11.5px), calc(100% - 11.5px) 100%, 0 100%, 0 11.5px); background: linear-gradient(135deg, color-mix(in srgb, var(--bg) 70%, #000), var(--bg)); }
+.ae-launch::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 70%); background-size: 250% 100%; animation: ae-sweep 4.5s ease-in-out infinite; pointer-events: none; z-index: -1; }
+.ae-launch:hover { transform: translateY(-3px); background: var(--accent); }
+.ae-launch.is-open { opacity: 0; pointer-events: none; }
+.ae-mark { display: grid; place-items: center; width: 36px; height: 36px; background: color-mix(in srgb, var(--accent) 14%, transparent); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.ae-mark svg { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; animation: ae-turn 12s linear infinite; }
+.ae-word { display: grid; gap: 2px; text-align: left; }
+.ae-word b { font: 600 13px/1 var(--serif); letter-spacing: .38em; color: var(--accent); }
+.ae-word i { font: 500 10.5px/1.2 var(--sans); font-style: normal; letter-spacing: .06em; color: var(--muted); }
+.ae-launch kbd { padding: 2px 7px; border: 1px solid var(--rule); font: 600 11px var(--mono); color: var(--muted); }
+
+/* Panel: opens over the page. */
+.ae-backdrop { position: fixed; inset: 0; z-index: 145; background: #04070ccc; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: ae-fade .25s ease; }
+.ae-panel { position: fixed; z-index: 146; left: 50%; top: 50%; width: min(1180px, calc(100% - 32px)); max-height: calc(100svh - 48px); display: flex; padding: 1px; transform: translate(-50%, -50%); background: color-mix(in srgb, var(--accent) 45%, transparent); clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px); filter: drop-shadow(0 40px 80px #000c); animation: ae-in .4s var(--ease); }
+.ae-inner { flex: 1; min-width: 0; display: flex; flex-direction: column; clip-path: polygon(17.5px 0, 100% 0, 100% calc(100% - 17.5px), calc(100% - 17.5px) 100%, 0 100%, 0 17.5px); background: linear-gradient(160deg, color-mix(in srgb, var(--bg) 92%, #fff 3%), var(--bg)); color: var(--fg); }
+.ae-panel[hidden], .ae-backdrop[hidden] { display: none; }
+.ae-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 22px; border-bottom: 1px solid var(--rule); }
+.ae-bar-id { font: 700 11px/1 var(--mono); letter-spacing: .24em; color: var(--accent); }
+.ae-bar-id em { font-style: normal; color: var(--muted); letter-spacing: .08em; }
+/* Mode switch: two machined keys. */
+.ae-tabs { display: flex; gap: 2px; margin-right: auto; margin-left: 18px; padding: 3px; background: color-mix(in srgb, var(--fg) 6%, transparent); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.ae-tab { padding: 8px 14px; font: 600 11.5px/1 var(--sans); letter-spacing: .08em; color: var(--muted); transition: color .25s, background .25s; }
+.ae-tab:hover { color: var(--fg); }
+.ae-tab[aria-selected="true"] { background: var(--accent); color: #0B1423; }
+.ae-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ae-body [role="tabpanel"][hidden] { display: none; }
+.ae-close { display: inline-flex; gap: 8px; align-items: center; padding: 7px 12px; border: 1px solid var(--rule); font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--muted); transition: color .25s, border-color .25s; }
+.ae-close:hover { color: var(--fg); border-color: var(--accent); }
+.ae-body { overflow-y: auto; padding: clamp(18px, 3vw, 34px); overscroll-behavior: contain; }
+html.aeternus-open { overflow: hidden; }
+
+@keyframes ae-sweep { 0%, 100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
+@keyframes ae-turn { to { transform: rotate(360deg); } }
+@keyframes ae-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ae-in { from { opacity: 0; transform: translate(-50%, calc(-50% + 18px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+@media (max-width: 560px) {
+  .ae-launch { right: 12px; bottom: 12px; padding: 8px 10px 8px 8px; }
+  .ae-word i, .ae-launch kbd { display: none; }
+  .ae-panel { top: auto; bottom: 0; left: 0; width: 100%; max-height: 92svh; transform: none; clip-path: none; padding: 1px 0 0; animation: ae-up .35s var(--ease); }
+  .ae-inner { clip-path: none; }
+  .ae-bar { flex-wrap: wrap; padding: 12px 14px; gap: 10px; }
+  .ae-bar-id em { display: none; }
+  .ae-tabs { order: 3; flex-basis: 100%; margin: 0; }
+  .ae-tab { flex: 1; padding: 9px 8px; }
+  .ae-body { padding: 14px; }
+}
+@keyframes ae-up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .ae-launch::before, .ae-mark svg { animation: none; }
+  .ae-panel, .ae-backdrop { animation: none; }
+}

@@ -15,14 +15,8 @@ export default function PulseChain() {
   return (
     <div className="pulse-chain" aria-label="Disciplines: Engineering, Healthcare, Supply Chains, Research, Analytics, Leadership, Creativity, Running">
       <svg viewBox={`0 0 ${W} 60`} preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <linearGradient id="pulseGrad" x1="0" x2="1">
-            <stop offset="0" stopColor="#C5A572" stopOpacity="0" />
-            <stop offset=".7" stopColor="#E2CDA4" />
-            <stop offset="1" stopColor="#ffffff" />
-          </linearGradient>
-        </defs>
         <path className="pc-base" d={LINE} />
+        <path className="pc-tail" d={LINE} pathLength={1} />
         <path className="pc-pulse" d={LINE} pathLength={1} />
         {nodes.map((x) => <circle key={x} className="pc-node" cx={x} cy={MID} r="3.5" />)}
       </svg>

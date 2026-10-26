@@ -5,7 +5,8 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const isPagesBuild = process.env.GITHUB_PAGES === "true";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Hide the dev-only "N" route indicator (it never appears on the live site); errors still show.
+  devIndicators: false,
   experimental: {
     agentFeedback: true,
     agentUpgrade: "security",
