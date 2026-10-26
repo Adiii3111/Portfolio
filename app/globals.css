@@ -195,20 +195,20 @@ html[data-intro="done"] .intro { display: none; }
 .tk-auto .tk-led { position: static; display: inline-block; margin-left: 6px; vertical-align: 1px; }
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 .brand { display: flex; align-items: center; margin-right: auto; }
-/* AKS monogram: the three glyphs draw in on open, then the supply nodes land and the heartbeat pulses on hover. */
-.monogram { display: block; width: 74px; height: auto; overflow: visible; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
-.mg-letters path { stroke-width: 5; stroke-dasharray: 1; stroke-dashoffset: 1; animation: mg-draw .9s cubic-bezier(.6, 0, .2, 1) forwards; }
-.mg-a { stroke: var(--fg); }
-.mg-k { stroke: var(--accent); }
-.mg-s { stroke: var(--blood); stroke-width: 4.5 !important; }
-.mg-letters path:nth-child(2) { animation-delay: .3s; }
-.mg-letters path:nth-child(3) { animation-delay: .5s; }
-.mg-letters path:nth-child(4) { animation-delay: .8s; animation-duration: 1.1s; }
-.mg-node { fill: var(--accent); opacity: 0; transform-box: fill-box; transform-origin: center; animation: mg-node .5s var(--ease) 1.4s forwards; }
-.brand:hover .mg-s { animation: mg-pulse 1s ease infinite; }
+/* AKS monogram: strokes draw in on open, then a unit runs the route to the red terminal. */
+.monogram { display: block; width: 62px; height: auto; overflow: visible; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
+.mg-letters path { stroke: var(--accent); stroke-width: 2.6; stroke-dasharray: 1; stroke-dashoffset: 1; animation: mg-draw .9s cubic-bezier(.6, 0, .2, 1) forwards; }
+.mg-letters path:nth-child(2) { animation-delay: .35s; }
+.mg-letters path:nth-child(3) { animation-delay: .45s; }
+.mg-letters path:nth-child(4) { animation-delay: .7s; }
+.mg-letters path:nth-child(5) { animation-delay: .8s; }
+.mg-letters path:nth-child(6) { animation-delay: 1s; animation-duration: 1.1s; }
+.mg-route { stroke: color-mix(in srgb, var(--fg) 45%, transparent); stroke-width: 1.2; stroke-dasharray: 1; stroke-dashoffset: 1; animation: mg-draw 1.2s ease 1.6s forwards; }
+.mg-node { fill: var(--blood); opacity: 0; transform-box: fill-box; transform-origin: center; animation: mg-node .5s var(--ease) 2.6s forwards; }
+.brand:hover .mg-node { animation: mg-beat 1s ease infinite; opacity: 1; }
 @keyframes mg-draw { to { stroke-dashoffset: 0; } }
 @keyframes mg-node { from { opacity: 0; transform: scale(0) rotate(45deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
-@keyframes mg-pulse { 0% { stroke-dashoffset: 1; } 60%, 100% { stroke-dashoffset: 0; } }
+@keyframes mg-beat { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.5); } }
 .brand-mark { font: 500 26px/1 var(--serif); letter-spacing: .02em; color: var(--accent); }
 .brand-name { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
 .header-nav { display: flex; gap: clamp(14px, 2vw, 30px); }

@@ -7,19 +7,8 @@
 .ae-launch::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 70%); background-size: 250% 100%; animation: ae-sweep 4.5s ease-in-out infinite; pointer-events: none; z-index: -1; }
 .ae-launch:hover { transform: translateY(-3px); background: var(--accent); }
 .ae-launch.is-open { opacity: 0; pointer-events: none; }
-.ae-launch.is-launching { clip-path: none; }
-.ae-launch.is-launching .ae-mark { clip-path: none; overflow: visible; }
 .ae-mark { display: grid; place-items: center; width: 36px; height: 36px; background: color-mix(in srgb, var(--accent) 14%, transparent); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-.ae-mark { width: 52px; }
-.ae-dragon { width: 44px; height: 24px; overflow: visible; animation: ae-glide 3.2s ease-in-out infinite; }
-.ae-dragon-body { fill: var(--accent); }
-.ae-dragon-wing { transform-box: fill-box; transform-origin: 100% 100%; animation: ae-flap 1.6s ease-in-out infinite; }
-.ae-dragon-cut { fill: none; stroke: color-mix(in srgb, var(--bg) 85%, #000); stroke-width: 1.1; stroke-linecap: round; }
-.ae-dragon-fire { fill: var(--blood); transform-box: fill-box; transform-origin: 0 50%; animation: ae-fire 1.6s ease-in-out infinite; }
-.ae-launch:hover .ae-dragon-fire { animation-duration: .5s; }
-/* Click: the dragon climbs out of its plate, then the panel opens. */
-.ae-launch.is-launching .ae-dragon { animation: ae-takeoff .52s cubic-bezier(.5, 0, .75, 0) forwards; }
-.ae-launch.is-launching .ae-dragon-wing { animation-duration: .18s; }
+.ae-mark svg { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; animation: ae-turn 12s linear infinite; }
 .ae-word { display: grid; gap: 2px; text-align: left; }
 .ae-word b { font: 600 13px/1 var(--serif); letter-spacing: .38em; color: var(--accent); }
 .ae-word i { font: 500 10.5px/1.2 var(--sans); font-style: normal; letter-spacing: .06em; color: var(--muted); }
@@ -46,10 +35,7 @@
 html.aeternus-open { overflow: hidden; }
 
 @keyframes ae-sweep { 0%, 100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
-@keyframes ae-glide { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-@keyframes ae-flap { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.72); } }
-@keyframes ae-fire { 0%, 100% { transform: scaleX(.7); opacity: .75; } 50% { transform: scaleX(1.15); opacity: 1; } }
-@keyframes ae-takeoff { 0% { transform: none; } 30% { transform: translate(-3px, 3px) rotate(6deg); } 100% { transform: translate(60px, -90px) rotate(-28deg) scale(1.8); opacity: 0; } }
+@keyframes ae-turn { to { transform: rotate(360deg); } }
 @keyframes ae-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ae-in { from { opacity: 0; transform: translate(-50%, calc(-50% + 18px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
 
@@ -66,6 +52,6 @@ html.aeternus-open { overflow: hidden; }
 }
 @keyframes ae-up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .ae-launch::before, .ae-dragon, .ae-dragon-wing, .ae-dragon-fire { animation: none; }
+  .ae-launch::before, .ae-mark svg { animation: none; }
   .ae-panel, .ae-backdrop { animation: none; }
 }
