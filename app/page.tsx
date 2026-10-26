@@ -81,7 +81,7 @@ export default function Home() {
           </div>
 
           <StatCards stats={heroStats} />
-          <p className="hero-hint" aria-hidden="true">This strand is my DNA: hover a base pair to read it · drag open space to turn the helix · <a href="#match">hiring? open AETERNUS →</a></p>
+          <p className="hero-hint" aria-hidden="true">Stir the circulation with your cursor · click open space to open a clinic · <a href="#match">hiring? open AETERNUS →</a></p>
           <PulseChain />
         </section>
 

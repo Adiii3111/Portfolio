@@ -1,21 +1,31 @@
+import "./monogram.css";
+
 /*
- * The AKS monogram, drawn as one supply route: the A is a peak, the K branches off it
- * like a supply split, the S flows out to a delivery point (the red terminal). It
- * draws itself in when the page opens.
+ * The AKS ligature, set on a forward slant. The letters share strokes: the A's right leg is
+ * the K's stem, the A's crossbar runs straight on into the K's upper arm, and the K's lower
+ * leg runs down into an angular S, so K→S is one route ending at the red delivery node.
+ * Every terminal is cut flat to the cap and base lines. A pulse runs that route once on
+ * open and again on hover.
  */
+const ROUTE = "M27.6 14.4 L39.6 35.5 H53 L57.5 31 V25.5 L42.8 15.5 V9.5 L47.3 4.5 H61";
+
 export default function Monogram({ className = "" }: { className?: string }) {
   return (
-    <svg className={`monogram ${className}`} viewBox="0 0 70 40" role="img" aria-label="AKS — Aditya Kadlabal Sripad">
-      <g className="mg-letters">
-        <path pathLength={1} d="M3 33 L13.5 5 L24 33" />
-        <path pathLength={1} d="M7.6 22.5 H19.4" />
-        <path pathLength={1} d="M30 5 V33" />
-        <path pathLength={1} d="M30 21 L43 5" />
-        <path pathLength={1} d="M34.2 16 L44 33" />
-        <path pathLength={1} d="M64 8.5 C60.5 4.5 50 4.2 50 11.6 C50 19.2 64.6 16.6 64.6 25.4 C64.6 33.6 53 35 49.4 29.6" />
+    <svg className={`monogram ${className}`} viewBox="-2 0 74 40" role="img" aria-label="AKS — Aditya Kadlabal Sripad">
+      <defs>
+        <clipPath id="mg-lines">
+          <rect x="-10" y="2.2" width="100" height="35.6" />
+        </clipPath>
+      </defs>
+      <g transform="skewX(-12) translate(4 0)">
+        <g className="mg-letters" clipPath="url(#mg-lines)">
+          <path pathLength={1} d="M2 42 L20.5 -2 V42" />
+          <path pathLength={1} d="M9.3 26.5 H20.5 L37.5 -2" />
+          <path pathLength={1} d={ROUTE} />
+        </g>
+        <circle className="mg-pulse" r="1.6" style={{ offsetPath: `path("${ROUTE}")` }} />
+        <path className="mg-node" d="M65.2 1.5 L68.2 4.5 L65.2 7.5 L62.2 4.5 Z" />
       </g>
-      <path className="mg-route" pathLength={1} d="M1 38 H58" />
-      <rect className="mg-node" x="58.5" y="35.5" width="5" height="5" />
     </svg>
   );
 }

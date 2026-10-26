@@ -16,6 +16,7 @@
   --sans: var(--font-sans), "Manrope", "Segoe UI", system-ui, sans-serif;
   --gutter: max(22px, calc((100% - 1240px) / 2));
   --ease: cubic-bezier(.2, .7, .2, 1);
+  --cell-ease: cubic-bezier(.5, 0, .15, 1);
   --hd: 2.55s; /* hero entrance delay while the intro plays */
   --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
 }
@@ -67,30 +68,42 @@
   --bad: #B4452A;
   --warn-text: #8A3A22;
   }
-/* Four moods, layered over the tone. Morning: cold steel at first light. Afternoon: bright
-   concrete. Evening: gunmetal and copper. Night: black steel and gold. */
+/* Four moods, layered over the tone, each with its own light in the sky (--sky):
+   Morning: clinical sky-blue and teal, low dawn light from the bottom left.
+   Afternoon: sunlit sand and amber, the sun high at the top right.
+   Evening: dusk plum and coral, a sunset glow along the bottom.
+   Night: midnight and gold, faint moonlight at the top left. */
 :root[data-time="morning"] {
-  --bg: #E6E9EC; --bg-top: #D9DFE5; --bg-2: #DCE1E6; --band: #FFFFFF3d;
-  --fg: #12161B; --fg-soft: #12161Bd9; --muted: #4F5964; --accent: #7A5A2A; --rule: #12161B1f;
-  --surface: #FFFFFF7a; --card: #FFFFFFa6; --card-solid: #F4F6F8;
-  --blood: #A3262A;
-  --field-a: 52, 66, 82; --field-b: 122, 90, 42; --field-hot: 163, 38, 42;
+  --bg: #E2ECF1; --bg-top: #CADCE8; --bg-2: #D5E3EB; --band: #FFFFFF40;
+  --fg: #0F1E29; --fg-soft: #0F1E29d9; --muted: #4A5C69; --accent: #1A6A76; --rule: #0F1E291f;
+  --surface: #FFFFFF7a; --card: #FFFFFFa6; --card-solid: #F1F7FA;
+  --glass: linear-gradient(180deg, #FFFFFFcc, #FFFFFF80), #E2ECF18c;
+  --blood: #B02A35;
+  --sky: radial-gradient(70% 60% at 0% 100%, #FFD7BD8c, transparent 70%), radial-gradient(60% 50% at 100% 0%, #FFFFFF99, transparent 70%);
+  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53;
 }
 :root[data-time="afternoon"] {
-  --bg: #EFECE6; --bg-top: #F4F2EE; --fg: #15181C; --fg-soft: #15181Cd9; --muted: #555A60; --accent: #80612A; --rule: #15181C1f;
+  --bg: #F6EEDC; --bg-top: #FBF5E6; --bg-2: #EFE4CD; --band: #FFFFFF52;
+  --fg: #1E1912; --fg-soft: #1E1912d9; --muted: #5F5545; --accent: #9C5A12; --rule: #1E19121f;
+  --surface: #FFFFFF80; --card: #FFFDF6b3; --card-solid: #FFFBF1;
+  --glass: linear-gradient(180deg, #FFFDF6d6, #FFFDF68a), #F6EEDC8c;
   --blood: #A3262A;
-  --field-a: 70, 64, 52; --field-b: 128, 97, 42; --field-hot: 163, 38, 42;
+  --sky: radial-gradient(55% 45% at 92% -5%, #FFE7A3b3, transparent 70%), radial-gradient(80% 60% at 0% 100%, #F2D9AE59, transparent 70%);
+  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40;
 }
 :root[data-time="evening"] {
-  --bg: #121417; --bg-top: #1A1C20; --bg-2: #171A1D; --band: #FFFFFF04;
-  --fg: #ECE7E1; --fg-soft: #ECE7E1cc; --muted: #A09A93; --accent: #D48A4E; --rule: #ECE7E11c;
-  --card-solid: #1C1F23;
-  --glass: linear-gradient(180deg, #ECE7E114, #ECE7E105), #16181Ccc;
-  --blood: #E0584F;
-  --field-a: 160, 120, 86; --field-b: 212, 138, 78; --field-hot: 224, 88, 79;
+  --bg: #1B1322; --bg-top: #24172B; --bg-2: #22182A; --band: #FFFFFF05;
+  --fg: #F3E7E1; --fg-soft: #F3E7E1cc; --muted: #B6A3A9; --accent: #F2916A; --rule: #F3E7E11c;
+  --surface: #F3E7E10a; --card: #F3E7E108; --card-solid: #261B30;
+  --glass: linear-gradient(180deg, #F3E7E114, #F3E7E105), #1F1628cc;
+  --blood: #F06A5C;
+  --sky: radial-gradient(110% 55% at 50% 115%, #E9714A6b, #9B3F6A26 45%, transparent 75%);
+  --field-a: 196, 128, 140; --field-b: 242, 145, 106; --field-hot: 240, 106, 92;
 }
 :root[data-time="night"], :root:not([data-time]) {
-  --bg: #070B11; --bg-top: #0B111B;
+  --bg: #04070D; --bg-top: #08101E; --bg-2: #0A1220;
+  --glass: linear-gradient(180deg, #F4F0E814, #F4F0E805), #0A1220cc;
+  --sky: radial-gradient(45% 40% at 12% -5%, #8FA8D62e, transparent 70%);
   --field-a: 150, 135, 105; --field-b: 226, 205, 164; --field-hot: 232, 97, 91;
 }
 
@@ -136,8 +149,10 @@ img { display: block; max-width: 100%; }
 h2 em, h1 em { font-style: italic; color: var(--accent); }
 .lede { max-width: 540px; margin-top: 26px; font-size: 17px; color: var(--muted); }
 
-html.js-reveal .reveal { opacity: 0; transform: translateY(26px); transition: opacity 1s var(--ease), transform 1s var(--ease); }
-html.js-reveal .reveal.in { opacity: 1; transform: none; }
+/* Reveals grow out like a cell, matching the mood transition; the clip only exists while animating, so nothing is clipped afterwards. */
+html.js-reveal .reveal { opacity: 0; transition: opacity .5s ease; }
+html.js-reveal .reveal.in { opacity: 1; animation: rv-cell 1.3s var(--cell-ease) backwards; }
+@keyframes rv-cell { from { clip-path: circle(0% at 24% 50%); } to { clip-path: circle(150% at 24% 50%); } }
 
 /* Maps (shared) */
 .map-land { fill: var(--gold); opacity: .2; }
@@ -183,7 +198,6 @@ html[data-intro="done"] .intro { display: none; }
 .site-header.is-scrolled { background: color-mix(in srgb, var(--bg) 78%, transparent); box-shadow: 0 1px 0 var(--rule); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
 
 /* Time-of-day keys: raised physical buttons with a status LED. */
-.time-keys { display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 12px; background: color-mix(in srgb, var(--fg) 7%, transparent); box-shadow: inset 0 1px 2px #0003, inset 0 0 0 1px var(--rule); }
 .tk-key { position: relative; display: grid; place-items: center; width: 34px; height: 32px; border-radius: 8px; color: var(--muted); background: linear-gradient(180deg, color-mix(in srgb, var(--fg) 10%, var(--bg)), var(--bg)); box-shadow: 0 2px 0 color-mix(in srgb, var(--fg) 16%, #000 30%), 0 3px 6px #0003, inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent); transition: transform .12s, box-shadow .12s, color .3s; }
 .tk-key:hover { color: var(--fg); }
 .tk-key:active { transform: translateY(2px); box-shadow: 0 0 0 transparent, inset 0 1px 3px #0005; }
@@ -191,55 +205,40 @@ html[data-intro="done"] .intro { display: none; }
 .tk-key svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .tk-led { position: absolute; top: 3px; right: 4px; width: 4px; height: 4px; border-radius: 50%; background: color-mix(in srgb, var(--fg) 22%, transparent); transition: background .3s, box-shadow .3s; }
 .tk-key[aria-pressed="true"] .tk-led { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-.tk-auto { width: auto; padding: 0 10px 0 9px; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-.tk-auto .tk-led { position: static; display: inline-block; margin-left: 6px; vertical-align: 1px; }
+.tk-one { width: auto; display: inline-flex; gap: 8px; padding: 0 14px 0 10px; height: 34px; color: var(--accent); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.tk-one svg { animation: tk-in .5s var(--ease); }
+.tk-one span { min-width: 7.2em; text-align: left; color: var(--fg); }
+.tk-one .tk-led { position: static; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: tk-led 1.2s ease infinite; }
+@keyframes tk-in { from { opacity: 0; transform: rotate(-90deg) scale(.4); } to { opacity: 1; transform: none; } }
+@keyframes tk-led { 0%, 100% { opacity: 1; } 12% { opacity: .35; } 24% { opacity: 1; } 36% { opacity: .5; } }
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-/* Mood transitions: html[data-vt] names the mood being switched to (set in TimeKeys.tsx). */
-@property --vt-p { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
-/* Morning — dawn: the new mood rises from the bottom behind a soft, glowing horizon. */
-html[data-vt="morning"]::view-transition-new(root) {
-  -webkit-mask-image: linear-gradient(to top, #000 calc(var(--vt-p) - 22%), transparent var(--vt-p));
-  mask-image: linear-gradient(to top, #000 calc(var(--vt-p) - 22%), transparent var(--vt-p));
-  animation: vt-dawn 1.2s cubic-bezier(.4, 0, .2, 1) both;
+/* Mood transition: cell division. A cell of the new mood appears mid-screen, pinches in two,
+   and the daughter cells drift apart and grow until they fill the page. .vt-cell (added by
+   TimeKeys.tsx) draws their glowing membranes and nuclei on top. Section reveals grow the
+   same way (see .reveal). */
+@property --cr { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --cd { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --cb { syntax: "<length>"; inherits: true; initial-value: 0px; }
+html[data-vt="cell"]::view-transition-new(root) {
+  -webkit-mask-image: radial-gradient(circle at calc(50% - var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(circle at calc(50% + var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(calc(var(--cd) + 1px) calc(var(--cb) + 1px) at 50% 50%, #000 99%, transparent 100%);
+  mask-image: radial-gradient(circle at calc(50% - var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(circle at calc(50% + var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(calc(var(--cd) + 1px) calc(var(--cb) + 1px) at 50% 50%, #000 99%, transparent 100%);
+  animation: vt-divide 1.5s cubic-bezier(.45, 0, .3, 1) both;
 }
-html[data-vt="morning"]::view-transition-old(root) { animation: vt-dawn-old 1.2s ease both; }
-@keyframes vt-dawn { from { --vt-p: 0%; filter: brightness(1.25) sepia(.25); } to { --vt-p: 125%; filter: none; } }
-@keyframes vt-dawn-old { to { filter: brightness(1.15); } }
-/* Afternoon — midday glare: the old page bleaches out, the new one comes into focus as eyes adjust. */
-html[data-vt="afternoon"]::view-transition-old(root) { animation: vt-glare-old .5s ease-in both; }
-html[data-vt="afternoon"]::view-transition-new(root) { animation: vt-glare-new .8s cubic-bezier(.2, .7, .2, 1) .3s both; }
-@keyframes vt-glare-old { to { filter: brightness(2.2) saturate(.3) contrast(.7); } }
-@keyframes vt-glare-new { from { opacity: 0; filter: brightness(2.2) blur(10px) saturate(.3); } to { opacity: 1; filter: none; } }
-/* Evening — sunset: the old page sinks down and burns to amber as it goes, uncovering evening beneath. */
-html[data-vt="evening"]::view-transition-old(root) { z-index: 2; animation: vt-sunset 1.1s cubic-bezier(.55, 0, .7, .4) both; }
-html[data-vt="evening"]::view-transition-new(root) { animation: vt-dusk 1.1s ease both; }
-@keyframes vt-sunset { 0% { transform: none; filter: none; opacity: 1; } 45% { filter: sepia(.7) saturate(1.8) hue-rotate(-12deg) brightness(.95); } 100% { transform: translateY(42%); filter: sepia(1) saturate(2.2) hue-rotate(-20deg) brightness(.5); opacity: 0; } }
-@keyframes vt-dusk { from { filter: brightness(.55) sepia(.5); } to { filter: none; } }
-/* Night — lights out: darkness closes in from the edges to the centre, then night fades up from black. */
-html[data-vt="night"]::view-transition-old(root) {
-  z-index: 2;
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 calc(var(--vt-p) - 14%), transparent var(--vt-p));
-  mask-image: radial-gradient(ellipse at 50% 50%, #000 calc(var(--vt-p) - 14%), transparent var(--vt-p));
-  animation: vt-lights-out .75s cubic-bezier(.6, 0, .8, .3) both;
+::view-transition-old(vt-cell), ::view-transition-new(vt-cell) { animation: none; }
+.vt-cell { position: fixed; inset: 0; z-index: 300; pointer-events: none; view-transition-name: vt-cell; animation: vt-divide 1.5s cubic-bezier(.45, 0, .3, 1) both, vt-membrane 1.5s ease both; }
+.vt-cell i { position: absolute; top: 50%; width: calc(var(--cr) * 2); height: calc(var(--cr) * 2); border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid var(--accent); box-shadow: 0 0 22px 2px color-mix(in srgb, var(--accent) 55%, transparent), inset 0 0 30px color-mix(in srgb, var(--accent) 30%, transparent); }
+.vt-cell i:first-child { left: calc(50% - var(--cd)); }
+.vt-cell i:last-child { left: calc(50% + var(--cd)); }
+.vt-cell i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, var(--blood), color-mix(in srgb, var(--blood) 30%, transparent) 70%, transparent); opacity: .75; }
+@keyframes vt-divide {
+  0% { --cr: 0px; --cd: 0px; --cb: 0px; }
+  24% { --cr: 9vmin; --cd: 0px; --cb: 9vmin; }
+  50% { --cr: 14vmin; --cd: 12vmin; --cb: 7vmin; }
+  66% { --cr: 20vmin; --cd: 24vmin; --cb: 0px; }
+  100% { --cr: 125vmax; --cd: 32vw; --cb: 0px; }
 }
-html[data-vt="night"]::view-transition-new(root) { animation: vt-night-up 1.25s ease both; }
-@keyframes vt-lights-out { from { --vt-p: 130%; } to { --vt-p: 0%; filter: brightness(.6); } }
-@keyframes vt-night-up { 0%, 50% { filter: brightness(0); } 100% { filter: none; } }
+@keyframes vt-membrane { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
 .brand { display: flex; align-items: center; margin-right: auto; }
-/* AKS monogram: strokes draw in on open, then a unit runs the route to the red terminal. */
-.monogram { display: block; width: 62px; height: auto; overflow: visible; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
-.mg-letters path { stroke: var(--accent); stroke-width: 2.6; stroke-dasharray: 1; stroke-dashoffset: 1; animation: mg-draw .9s cubic-bezier(.6, 0, .2, 1) forwards; }
-.mg-letters path:nth-child(2) { animation-delay: .35s; }
-.mg-letters path:nth-child(3) { animation-delay: .45s; }
-.mg-letters path:nth-child(4) { animation-delay: .7s; }
-.mg-letters path:nth-child(5) { animation-delay: .8s; }
-.mg-letters path:nth-child(6) { animation-delay: 1s; animation-duration: 1.1s; }
-.mg-route { stroke: color-mix(in srgb, var(--fg) 45%, transparent); stroke-width: 1.2; stroke-dasharray: 1; stroke-dashoffset: 1; animation: mg-draw 1.2s ease 1.6s forwards; }
-.mg-node { fill: var(--blood); opacity: 0; transform-box: fill-box; transform-origin: center; animation: mg-node .5s var(--ease) 2.6s forwards; }
-.brand:hover .mg-node { animation: mg-beat 1s ease infinite; opacity: 1; }
-@keyframes mg-draw { to { stroke-dashoffset: 0; } }
-@keyframes mg-node { from { opacity: 0; transform: scale(0) rotate(45deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
-@keyframes mg-beat { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.5); } }
 .brand-mark { font: 500 26px/1 var(--serif); letter-spacing: .02em; color: var(--accent); }
 .brand-name { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
 .header-nav { display: flex; gap: clamp(14px, 2vw, 30px); }
@@ -342,15 +341,11 @@ html[data-vt="night"]::view-transition-new(root) { animation: vt-night-up 1.25s 
 
 /* ═════════════════════ Backdrop: supply-network blueprint ═════════════════════ */
 .lanefield { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background:
+    var(--sky, linear-gradient(transparent, transparent)),
     radial-gradient(120% 80% at 50% 0%, transparent 40%, color-mix(in srgb, #000 28%, transparent) 100%),
     linear-gradient(180deg, var(--bg-top, var(--bg)), var(--bg)); }
 .lanefield-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* The DNA's reading: the skill carried by the base pair under the cursor (HelixField.tsx). */
-.helix-tag { position: absolute; left: 0; top: 0; display: grid; gap: 3px; padding: 7px 11px 8px; border-left: 2px solid var(--accent); background: color-mix(in srgb, var(--bg) 88%, transparent); box-shadow: 0 10px 24px -12px #0008; white-space: nowrap; opacity: 0; transition: opacity .2s; will-change: transform; }
-.helix-tag.is-on { opacity: 1; }
-.helix-tag span { font: 600 9.5px/1 var(--mono); letter-spacing: .14em; color: var(--muted); }
-.helix-tag b { font: 500 17px/1.1 var(--serif); color: var(--fg); }
-.helix-tag i { font: 600 9.5px/1.2 var(--sans); font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
 html.helix-turning, html.helix-turning * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
 .lanefield-readout { position: absolute; left: 0; top: 0; padding: 3px 7px; border-left: 2px solid var(--accent); background: color-mix(in srgb, var(--bg) 85%, transparent); font: 600 10px/1.4 var(--mono); letter-spacing: .08em; color: var(--fg-soft); white-space: nowrap; opacity: 0; transition: opacity .25s; will-change: transform; }
 
@@ -366,12 +361,20 @@ html.helix-turning, html.helix-turning * { cursor: grabbing !important; user-sel
 .pulse-chain { padding: 6px 0 24px; opacity: 0; animation: fade 1s ease calc(var(--hd) + .7s) forwards; }
 .pulse-chain svg { display: block; width: 100%; height: 46px; overflow: visible; }
 .pc-base { fill: none; stroke: color-mix(in srgb, var(--fg) 18%, transparent); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
-.pc-pulse { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: .06 2; stroke-dashoffset: .06; filter: drop-shadow(0 0 5px var(--accent)); animation: pulseRun 5.5s linear calc(var(--hd) + 1s) infinite; }
-.pc-tail { fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: .16 2; stroke-dashoffset: .16; opacity: .35; animation: pulseTail 5.5s linear calc(var(--hd) + 1s) infinite; }
+.pc-pulse { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: .06 2; stroke-dashoffset: .06; filter: drop-shadow(0 0 5px var(--accent)); }
+.is-timed .pc-pulse { animation: pulseRun 5.5s linear calc(var(--hd) + 1s) infinite; }
+.pc-tail { fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: .16 2; stroke-dashoffset: .16; opacity: .35; }
+.is-timed .pc-tail { animation: pulseTail 5.5s linear calc(var(--hd) + 1s) infinite; }
 .pc-node { fill: var(--bg); stroke: var(--gold); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
 .pulse-chain ul { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); margin-top: 8px; }
 .pulse-chain li { text-align: center; font-size: 10px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
-.pulse-chain li.is-key { color: var(--accent); }
+.pulse-chain li { transition: color .3s; }
+.pc-node { transform-box: fill-box; transform-origin: center; }
+/* Each word and its node flare as the pulse reaches them (--at is set per node in PulseChain.tsx). */
+.pulse-chain.is-timed li { animation: pcGlow 5.5s ease-out calc(var(--hd) + 1s + var(--at, 0s)) infinite backwards; }
+.pulse-chain.is-timed .pc-node { animation: pcNode 5.5s ease-out calc(var(--hd) + 1s + var(--at, 0s)) infinite backwards; }
+@keyframes pcGlow { 0% { color: var(--accent); text-shadow: 0 0 14px var(--accent), 0 0 2px var(--accent); } 4% { color: var(--accent); text-shadow: 0 0 18px var(--accent), 0 0 3px var(--accent); } 30%, 100% { color: var(--muted); text-shadow: none; } }
+@keyframes pcNode { 0% { fill: var(--accent); stroke: var(--accent); transform: scale(1.8); filter: drop-shadow(0 0 6px var(--accent)); } 25%, 100% { fill: var(--bg); stroke: var(--gold); transform: none; filter: none; } }
 
 /* Closing: a soft glow behind the molecular globe. */
 .contact-backdrop { position: absolute; inset: 0; z-index: -1; pointer-events: none; -webkit-mask-image: linear-gradient(180deg, transparent, #000 220px); mask-image: linear-gradient(180deg, transparent, #000 220px); }
@@ -750,7 +753,8 @@ html.helix-turning, html.helix-turning * { cursor: grabbing !important; user-sel
   .brand-mark { display: inline; }
   .brand-name { display: none; }
   .tk-key { width: 30px; }
-  .tk-auto { width: auto; padding: 0 7px; font-size: 9px; letter-spacing: .08em; }
+  .tk-one { width: auto; padding: 0 10px; }
+  .tk-one span { display: none; }
 }
 @media (max-width: 560px) {
   .header-cta { display: none; }

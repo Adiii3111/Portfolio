@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 /*
- * A bank of four physical-looking keys — morning, afternoon, evening, night — plus an
- * Auto key that follows the visitor's clock. The mood lives on <html data-time>, with
- * data-theme carrying the light/dark tone (both set before first paint in layout.tsx).
+ * One physical-looking key showing the current mood: morning, afternoon, evening or night.
+ * The page always opens on the visitor's time of day (set before first paint in layout.tsx);
+ * each press moves on to the next mood. The mood lives on <html data-time>, with data-theme
+ * carrying the light/dark tone.
  */
 
 export type Time = "morning" | "afternoon" | "evening" | "night";
@@ -23,65 +24,44 @@ export const clockTime = (d = new Date()): Time => {
 
 const subscribe = (cb: () => void) => {
   const mo = new MutationObserver(cb);
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-time", "data-time-mode"] });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-time"] });
   return () => mo.disconnect();
 };
-const read = () => `${document.documentElement.dataset.time ?? "night"}|${document.documentElement.dataset.timeMode ?? "auto"}`;
+const read = () => (document.documentElement.dataset.time ?? "night") as Time;
 
-function setMood(time: Time, mode: "auto" | "manual", from?: HTMLElement) {
+function setMood(time: Time) {
   const root = document.documentElement;
-  if (root.dataset.time === time && root.dataset.timeMode === mode) return;
   const apply = () => {
     root.dataset.time = time;
-    root.dataset.timeMode = mode;
     root.dataset.theme = time === "morning" || time === "afternoon" ? "light" : "dark";
   };
-  try { localStorage.setItem("aks-time", mode === "auto" ? "auto" : time); } catch {}
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!from || !document.startViewTransition || reduced || root.dataset.time === time) return apply();
-  // Each mood arrives its own way (see "Mood transitions" in globals.css): morning rises from
-  // the bottom like dawn, afternoon flares in like midday glare, evening sinks the old page
-  // like a setting sun, night closes the lights in from the edges.
-  root.dataset.vt = time;
-  document.startViewTransition(apply).finished.finally(() => { delete root.dataset.vt; });
+  if (!document.startViewTransition || reduced) return apply();
+  // Cell division (see "Mood transition" in globals.css): the new mood arrives as a cell
+  // that splits in two and grows until it fills the page.
+  const cell = document.createElement("div");
+  cell.className = "vt-cell";
+  cell.setAttribute("aria-hidden", "true");
+  cell.innerHTML = "<i></i><i></i>";
+  root.dataset.vt = "cell";
+  document.startViewTransition(() => { apply(); document.body.append(cell); }).finished.finally(() => { cell.remove(); delete root.dataset.vt; });
 }
 
 export default function TimeKeys() {
-  const [time, mode] = useSyncExternalStore(subscribe, read, () => "night|auto").split("|") as [Time, "auto" | "manual"];
-
-  // In auto mode, follow the clock as the day goes on.
-  useEffect(() => {
-    if (mode !== "auto") return;
-    // Read the real mode: during hydration the store briefly reports the server default.
-    const tick = () => { if (document.documentElement.dataset.timeMode !== "manual") setMood(clockTime(), "auto"); };
-    tick();
-    const id = setInterval(tick, 60_000);
-    return () => clearInterval(id);
-  }, [mode]);
+  const time = useSyncExternalStore(subscribe, read, () => "night" as Time);
+  const i = TIMES.findIndex((t) => t.id === time);
+  const now = TIMES[Math.max(0, i)], next = TIMES[(Math.max(0, i) + 1) % TIMES.length];
 
   return (
-    <div className="time-keys" role="group" aria-label="Time of day">
-      {TIMES.map((t) => (
-        <button
-          key={t.id}
-          className="tk-key"
-          aria-pressed={time === t.id}
-          aria-label={`${t.label}${time === t.id && mode === "auto" ? " (now, from your clock)" : ""}`}
-          title={t.label}
-          onClick={(e) => setMood(t.id, "manual", e.currentTarget)}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">{t.icon}</svg>
-          <i className="tk-led" aria-hidden="true" />
-        </button>
-      ))}
-      <button
-        className="tk-key tk-auto"
-        aria-pressed={mode === "auto"}
-        title="Follow my clock"
-        onClick={(e) => setMood(clockTime(), "auto", e.currentTarget)}
-      >
-        Auto<i className="tk-led" aria-hidden="true" />
-      </button>
-    </div>
+    <button
+      className="tk-key tk-one"
+      aria-label={`Mood: ${now.label}. Switch to ${next.label}`}
+      title={`${now.label} — click for ${next.label.toLowerCase()}`}
+      onClick={() => setMood(next.id)}
+    >
+      <svg key={now.id} viewBox="0 0 24 24" aria-hidden="true">{now.icon}</svg>
+      <span>{now.label}</span>
+      <i className="tk-led" aria-hidden="true" />
+    </button>
   );
 }
