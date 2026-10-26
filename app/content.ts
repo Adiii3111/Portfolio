@@ -10,6 +10,28 @@ export const person = {
   linkedin: "https://www.linkedin.com/in/adityakadlabalsripad/",
 };
 
+// Three tailored résumés, served from /public/resumes.
+export const resumes = [
+  {
+    title: "Supply Chain & Operations",
+    file: "/resumes/Aditya_Sripad_Supply_Chain_and_Operations_Resume.pdf",
+    summary: "MRP, inventory logic, demand forecasting, shipment consolidation, vehicle routing, and Lean process improvement.",
+    for: "Supply chain, operations, logistics, and planning roles",
+  },
+  {
+    title: "Business & Data Analytics",
+    file: "/resumes/Aditya_Sripad_Business_and_Data_Analytics_Resume.pdf",
+    summary: "Python and Power BI analytics, forecasting model validation, customer segmentation, and churn-risk scoring.",
+    for: "Business analyst, data analyst, and BI roles",
+  },
+  {
+    title: "Healthcare Supply Chain",
+    file: "/resumes/Aditya_Sripad_Healthcare_Supply_Chain_Resume.pdf",
+    summary: "Cold chain, lot expiry tracking, hospital resource planning, and blood supply chain simulation research.",
+    for: "Healthcare, life sciences, and medical supply chain roles",
+  },
+];
+
 export const sections = [
   { id: "top", label: "Opening", short: "Home" },
   { id: "about", label: "About Me", short: "About" },
@@ -23,6 +45,7 @@ export const sections = [
   { id: "beyond", label: "Life Beyond Engineering", short: "Beyond" },
   { id: "recommendations", label: "Recommendations", short: "Words" },
   { id: "toolkit", label: "Toolkit & Certifications", short: "Toolkit" },
+  { id: "resume", label: "Résumé", short: "Résumé" },
   { id: "contact", label: "Contact", short: "Contact" },
 ] as const;
 

@@ -12,7 +12,7 @@ import Toolkit from "./components/Toolkit";
 import LivingCanvas from "./components/LivingCanvas";
 import { asset } from "./lib/asset";
 import ContactLauncher from "./components/ContactLauncher";
-import { community, mercuryCapabilities, otherRoles, paper, person, vaxxinova } from "./content";
+import { community, mercuryCapabilities, otherRoles, paper, person, resumes, vaxxinova } from "./content";
 
 function ChapterHead({ n, label, title, lede }: { n: string; label: string; title: React.ReactNode; lede?: string }) {
   return (
@@ -43,6 +43,7 @@ export default function Home() {
               <div className="hero-actions">
                 <a className="btn btn-gold" href="#journey">Explore my journey</a>
                 <a className="btn btn-line" href="#work">Selected work</a>
+                <a className="text-link" href="#resume">Résumé →</a>
                 <a className="text-link" href="#contact">Connect →</a>
               </div>
             </div>
@@ -228,10 +229,29 @@ export default function Home() {
           <div className="reveal"><Toolkit /></div>
         </section>
 
-        {/* 13 — CONTACT */}
+        {/* 13 — RÉSUMÉ */}
+        <section id="resume" data-theme="dark" className="chapter dark resume">
+          <ChapterHead n="13" label="Résumé" title={<>One career, <em>three lenses.</em></>} lede="Pick the version that fits the role you’re hiring for. Each opens in a new tab or downloads as a PDF." />
+          <ol className="resume-grid">
+            {resumes.map((r, i) => (
+              <li key={r.file} className="resume-card reveal">
+                <span className="resume-n">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{r.title}</h3>
+                <p className="resume-for">{r.for}</p>
+                <p>{r.summary}</p>
+                <div className="resume-actions">
+                  <a className="btn btn-gold" href={asset(r.file)} target="_blank" rel="noreferrer">View</a>
+                  <a className="btn btn-line" href={asset(r.file)} download>Download</a>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* 14 — CONTACT */}
         <section id="contact" data-theme="dark" className="chapter dark contact">
           <div className="contact-backdrop" aria-hidden="true"><LivingCanvas mode="sphere" /></div>
-          <p className="chapter-label reveal"><span>13</span>The next chapter</p>
+          <p className="chapter-label reveal"><span>14</span>The next chapter</p>
           <h2 className="contact-title reveal">Let’s build <em>what’s next.</em></h2>
           <p className="lede reveal">Exploring full-time opportunities in healthcare, life sciences, supply chain, and analytics beginning in early 2027.</p>
           <div className="contact-actions reveal">

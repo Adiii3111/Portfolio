@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { person, sections } from "../content";
 import ContactLauncher from "./ContactLauncher";
 
-const headerLinks = ["about", "journey", "experience", "work", "research", "lab", "running", "contact"];
+const headerLinks = ["about", "journey", "experience", "work", "research", "lab", "running", "resume", "contact"];
 
 export default function SiteNav() {
   const [active, setActive] = useState("top");
