@@ -13,6 +13,7 @@ import LivingCanvas from "./components/LivingCanvas";
 import { asset } from "./lib/asset";
 import ContactLauncher from "./components/ContactLauncher";
 import LaneField from "./components/LaneField";
+import Vitrine from "./components/Vitrine";
 import AeternusDock from "./components/AeternusDock";
 import ShelfLife from "./components/ShelfLife";
 import { ResumePicker } from "./components/RoleMatch";
@@ -49,6 +50,7 @@ export default function Home() {
   return (
     <>
       <LaneField />
+      <Vitrine />
       <Intro />
       <SiteNav />
       <AeternusDock />
