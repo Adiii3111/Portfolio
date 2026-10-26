@@ -68,7 +68,6 @@ export default function AeternusDock() {
           <Dragon />
         </span>
         <span className="ae-word"><b>AETERNUS</b><i>Ask me anything</i></span>
-        <kbd aria-hidden="true">/</kbd>
       </button>
 
       <div className="ae-backdrop" hidden={!open} onClick={close} />

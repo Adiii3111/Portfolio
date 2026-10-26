@@ -23,7 +23,6 @@
 .ae-word { display: grid; gap: 2px; text-align: left; }
 .ae-word b { font: 600 13px/1 var(--serif); letter-spacing: .38em; color: var(--accent); }
 .ae-word i { font: 500 10.5px/1.2 var(--sans); font-style: normal; letter-spacing: .06em; color: var(--muted); }
-.ae-launch kbd { padding: 2px 7px; border: 1px solid var(--rule); font: 600 11px var(--mono); color: var(--muted); }
 
 /* Panel: opens over the page. */
 .ae-backdrop { position: fixed; inset: 0; z-index: 145; background: #04070ccc; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: ae-fade .25s ease; }
@@ -55,7 +54,7 @@ html.aeternus-open { overflow: hidden; }
 
 @media (max-width: 560px) {
   .ae-launch { right: 12px; bottom: 12px; padding: 8px 10px 8px 8px; }
-  .ae-word i, .ae-launch kbd { display: none; }
+  .ae-word i { display: none; }
   .ae-panel { top: auto; bottom: 0; left: 0; width: 100%; max-height: 92svh; transform: none; clip-path: none; padding: 1px 0 0; animation: ae-up .35s var(--ease); }
   .ae-inner { clip-path: none; }
   .ae-bar { flex-wrap: wrap; padding: 12px 14px; gap: 10px; }
