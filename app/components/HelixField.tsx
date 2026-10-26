@@ -30,6 +30,7 @@ const RUNG = 46;         // px between base pairs (≈ 10.5 pairs per turn)
 const TWIST = (Math.PI * 2) / (RUNG * 10.5);
 const GROOVE = 2.35;     // phase gap between the two backbones: major vs minor groove
 const LEVELS = 4;        // depth bands, batched
+const TAPERS = 4;        // fade bands towards the molecule's ends
 
 // Circulation.
 const DENSITY = 1 / 6500;   // particles per px²
@@ -92,12 +93,6 @@ export default function HelixField() {
       while (parts.length < want) parts.push(spawn(false));
     };
 
-    // Where the helix axis sits for a given world y: two slow, unrelated bends.
-    const axis = (wy: number) => {
-      const amp = Math.min(W * 0.11, 150);
-      return W * 0.5 + amp * Math.sin(wy * 0.0011 + 0.6) + amp * 0.45 * Math.sin(wy * 0.0027 + 2.1);
-    };
-
     const step = (now: number) => {
       const beat = beatAt(now);
       const surge = 1 + beat * 1.3;
@@ -152,50 +147,66 @@ export default function HelixField() {
       return Math.min(1, age / 300) * Math.min(1, (DEPOT_LIFE - age) / 1000);
     };
 
-    const drawHelix = (beat: number) => {
-      const R = Math.min(W * 0.2, 250);
-      const travel = pos * 0.55;
-      const spin = pos * 0.0032 + turn;
-      const y0 = -RUNG * 2, y1 = H + RUNG * 2;
-      const pt = (sy: number, phase: number) => {
-        const wy = sy + travel;
-        const th = wy * TWIST + spin + phase;
-        return { x: axis(wy) + Math.cos(th) * R, y: sy, z: Math.sin(th) };
-      };
-      const level = (z: number) => Math.min(LEVELS - 1, Math.floor((0.5 + z * 0.5) * LEVELS));
+    // The DNA: a molecule of limited length drifting diagonally, bottom-left to top-right, turning
+    // on its own axis as it goes. When one leaves the far corner the next is already coming in.
+    const drawHelix = (now: number, beat: number) => {
+      const R = Math.min(Math.min(W, H) * 0.17, 200);
+      const ang = Math.atan2(H, W) * 0.85;                       // a little flatter than the true diagonal
+      const ux = Math.cos(ang), uy = -Math.sin(ang);             // along the axis, towards top-right
+      const nx = -uy, ny = ux;                                   // across it
+      const margin = R + 60;
+      const span = Math.hypot(W, H) + margin * 2;                // axis length from corner to corner, off-screen both ends
+      const ox = W / 2 - ux * span / 2, oy = H / 2 - uy * span / 2;
+      const L = span * 0.62, cycle = span + L;
+      const travel = now * 0.06 + pos * 0.5;                     // drifts on its own; scrolling pushes it along
+      const spin = now * 0.0005 + turn;
       const lift = beat * 0.05;
+      const level = (z: number) => Math.min(LEVELS - 1, Math.floor((0.5 + z * 0.5) * LEVELS));
+
       for (const front of [false, true]) {
-        const bb = Array.from({ length: LEVELS }, () => new Path2D());
-        const rungG = Array.from({ length: LEVELS }, () => new Path2D());
-        const rungR = Array.from({ length: LEVELS }, () => new Path2D());
-        const first = Math.ceil((y0 + travel) / RUNG) * RUNG - travel;
-        for (let sy = first; sy < y1; sy += RUNG) {
-          const a = pt(sy, 0), b = pt(sy, GROOVE);
-          const z = (a.z + b.z) / 2;
-          if ((z >= 0) !== front) continue;
-          const k = Math.round((sy + travel) / RUNG);
-          const gc = ((k * 7919) % 5) < 2;
-          const lv = level(z);
-          const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-          rungG[lv].moveTo(a.x, a.y); rungG[lv].lineTo(mx, my);
-          (gc ? rungR : rungG)[lv].moveTo(mx, my); (gc ? rungR : rungG)[lv].lineTo(b.x, b.y);
-        }
-        for (const phase of [0, GROOVE]) {
-          let prev = pt(y0, phase);
-          for (let sy = y0 + STEP; sy <= y1; sy += STEP) {
-            const p = pt(sy, phase);
-            const z = (p.z + prev.z) / 2;
-            if ((z >= 0) === front) { bb[level(z)].moveTo(prev.x, prev.y); bb[level(z)].lineTo(p.x, p.y); }
-            prev = p;
+        // Paths bucketed by depth (line weight) and by taper (fading out at the molecule's ends).
+        const bb = Array.from({ length: LEVELS * TAPERS }, () => new Path2D());
+        const rungG = Array.from({ length: LEVELS * TAPERS }, () => new Path2D());
+        const rungR = Array.from({ length: LEVELS * TAPERS }, () => new Path2D());
+        for (let k = 0; k < 2; k++) {
+          const head = (((travel + (k * cycle) / 2) % cycle) + cycle) % cycle, tail = head - L;
+          const pt = (sx: number, phase: number) => {
+            const local = sx - head;
+            const th = local * TWIST + spin + phase;
+            const off = R * 0.4 * Math.sin(local * 0.0021 + k * 2) + Math.cos(th) * R;
+            return { x: ox + ux * sx + nx * off, y: oy + uy * sx + ny * off, z: Math.sin(th) };
+          };
+          const taper = (sx: number) => Math.min(TAPERS - 1, Math.floor(Math.sin(Math.PI * Math.max(0, Math.min(1, (sx - tail) / L))) ** 0.7 * TAPERS));
+          const from = Math.max(tail, -10), to = Math.min(head, span + 10);
+          if (from >= to) continue;
+          for (let j = Math.ceil((head - to) / RUNG); head - j * RUNG > from; j++) {
+            const sx = head - j * RUNG;
+            const a = pt(sx, 0), b = pt(sx, GROOVE);
+            const z = (a.z + b.z) / 2;
+            if ((z >= 0) !== front) continue;
+            const gc = ((j * 7919 + k * 13) % 5) < 2;
+            const key = level(z) * TAPERS + taper(sx);
+            const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+            rungG[key].moveTo(a.x, a.y); rungG[key].lineTo(mx, my);
+            (gc ? rungR : rungG)[key].moveTo(mx, my); (gc ? rungR : rungG)[key].lineTo(b.x, b.y);
+          }
+          for (const phase of [0, GROOVE]) {
+            let prev = pt(from, phase);
+            for (let sx = from + STEP; sx <= to; sx += STEP) {
+              const q = pt(sx, phase);
+              const z = (q.z + prev.z) / 2;
+              if ((z >= 0) === front) { const key = level(z) * TAPERS + taper(sx); bb[key].moveTo(prev.x, prev.y); bb[key].lineTo(q.x, q.y); }
+              prev = q;
+            }
           }
         }
-        for (let lv = 0; lv < LEVELS; lv++) {
-          const d = (lv + 0.5) / LEVELS;
-          ctx.lineWidth = 0.8 + d * 1.2;
-          ctx.strokeStyle = rgba(col.gold, 0.03 + d * 0.1 + lift); ctx.stroke(rungG[lv]);
-          ctx.strokeStyle = rgba(col.red, 0.03 + d * 0.11 + lift); ctx.stroke(rungR[lv]);
-          ctx.lineWidth = 0.8 + d * 2.4;
-          ctx.strokeStyle = rgba(col.gold, 0.04 + d * 0.18 + lift); ctx.stroke(bb[lv]);
+        for (let lv = 0; lv < LEVELS; lv++) for (let tp = 0; tp < TAPERS; tp++) {
+          const d = (lv + 0.5) / LEVELS, f = (tp + 1) / TAPERS, key = lv * TAPERS + tp;
+          ctx.lineWidth = 1 + d * 1.6;
+          ctx.strokeStyle = rgba(col.gold, (0.05 + d * 0.16 + lift) * f); ctx.stroke(rungG[key]);
+          ctx.strokeStyle = rgba(col.red, (0.05 + d * 0.18 + lift) * f); ctx.stroke(rungR[key]);
+          ctx.lineWidth = 1 + d * 3;
+          ctx.strokeStyle = rgba(col.gold, (0.07 + d * 0.28 + lift) * f); ctx.stroke(bb[key]);
         }
       }
     };
@@ -203,7 +214,7 @@ export default function HelixField() {
     const draw = (now: number, beat: number) => {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      drawHelix(beat);
+      drawHelix(now, beat);
 
       // Traffic: faint trails for everything, brighter for whatever the cursor or a clinic has hold of.
       const trails = [new Path2D(), new Path2D(), new Path2D(), new Path2D()]; // cell, crate, hot cell, hot crate

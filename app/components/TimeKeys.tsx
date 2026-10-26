@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { perfuse } from "./moodTransition";
 
 /*
  * One physical-looking key showing the current mood: morning, afternoon, evening or night.
@@ -29,22 +30,19 @@ const subscribe = (cb: () => void) => {
 };
 const read = () => (document.documentElement.dataset.time ?? "night") as Time;
 
-function setMood(time: Time) {
+let busy = false;
+function setMood(time: Time, from: HTMLElement) {
   const root = document.documentElement;
   const apply = () => {
     root.dataset.time = time;
     root.dataset.theme = time === "morning" || time === "afternoon" ? "light" : "dark";
   };
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!document.startViewTransition || reduced) return apply();
-  // Cell division (see "Mood transition" in globals.css): the new mood arrives as a cell
-  // that splits in two and grows until it fills the page.
-  const cell = document.createElement("div");
-  cell.className = "vt-cell";
-  cell.setAttribute("aria-hidden", "true");
-  cell.innerHTML = "<i></i><i></i>";
-  root.dataset.vt = "cell";
-  document.startViewTransition(() => { apply(); document.body.append(cell); }).finished.finally(() => { cell.remove(); delete root.dataset.vt; });
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return apply();
+  if (busy) return;
+  // Perfusion (moodTransition.ts): vessels branch out of this key, the new mood floods in
+  // behind them, and the page clears again in the new colours.
+  busy = true;
+  perfuse(time, from, () => { apply(); setTimeout(() => { busy = false; }, 760); });
 }
 
 export default function TimeKeys() {
@@ -57,7 +55,7 @@ export default function TimeKeys() {
       className="tk-key tk-one"
       aria-label={`Mood: ${now.label}. Switch to ${next.label}`}
       title={`${now.label} — click for ${next.label.toLowerCase()}`}
-      onClick={() => setMood(next.id)}
+      onClick={(e) => setMood(next.id, e.currentTarget)}
     >
       <svg key={now.id} viewBox="0 0 24 24" aria-hidden="true">{now.icon}</svg>
       <span>{now.label}</span>

@@ -16,7 +16,7 @@
   --sans: var(--font-sans), "Manrope", "Segoe UI", system-ui, sans-serif;
   --gutter: max(22px, calc((100% - 1240px) / 2));
   --ease: cubic-bezier(.2, .7, .2, 1);
-  --cell-ease: cubic-bezier(.5, 0, .15, 1);
+  --perfuse-ease: cubic-bezier(.4, 0, .2, 1);
   --hd: 2.55s; /* hero entrance delay while the intro plays */
   --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
 }
@@ -149,10 +149,10 @@ img { display: block; max-width: 100%; }
 h2 em, h1 em { font-style: italic; color: var(--accent); }
 .lede { max-width: 540px; margin-top: 26px; font-size: 17px; color: var(--muted); }
 
-/* Reveals grow out like a cell, matching the mood transition; the clip only exists while animating, so nothing is clipped afterwards. */
+/* Reveals spread in from the corner like the mood perfusion; the clip only exists while animating, so nothing is clipped afterwards. */
 html.js-reveal .reveal { opacity: 0; transition: opacity .5s ease; }
-html.js-reveal .reveal.in { opacity: 1; animation: rv-cell 1.3s var(--cell-ease) backwards; }
-@keyframes rv-cell { from { clip-path: circle(0% at 24% 50%); } to { clip-path: circle(150% at 24% 50%); } }
+html.js-reveal .reveal.in { opacity: 1; animation: rv-perfuse 1.2s var(--perfuse-ease) backwards; }
+@keyframes rv-perfuse { from { clip-path: circle(0% at 0% 0%); } to { clip-path: circle(150% at 0% 0%); } }
 
 /* Maps (shared) */
 .map-land { fill: var(--gold); opacity: .2; }
@@ -211,33 +211,8 @@ html[data-intro="done"] .intro { display: none; }
 .tk-one .tk-led { position: static; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: tk-led 1.2s ease infinite; }
 @keyframes tk-in { from { opacity: 0; transform: rotate(-90deg) scale(.4); } to { opacity: 1; transform: none; } }
 @keyframes tk-led { 0%, 100% { opacity: 1; } 12% { opacity: .35; } 24% { opacity: 1; } 36% { opacity: .5; } }
-::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-/* Mood transition: cell division. A cell of the new mood appears mid-screen, pinches in two,
-   and the daughter cells drift apart and grow until they fill the page. .vt-cell (added by
-   TimeKeys.tsx) draws their glowing membranes and nuclei on top. Section reveals grow the
-   same way (see .reveal). */
-@property --cr { syntax: "<length>"; inherits: true; initial-value: 0px; }
-@property --cd { syntax: "<length>"; inherits: true; initial-value: 0px; }
-@property --cb { syntax: "<length>"; inherits: true; initial-value: 0px; }
-html[data-vt="cell"]::view-transition-new(root) {
-  -webkit-mask-image: radial-gradient(circle at calc(50% - var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(circle at calc(50% + var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(calc(var(--cd) + 1px) calc(var(--cb) + 1px) at 50% 50%, #000 99%, transparent 100%);
-  mask-image: radial-gradient(circle at calc(50% - var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(circle at calc(50% + var(--cd)) 50%, #000 var(--cr), transparent calc(var(--cr) + 1px)), radial-gradient(calc(var(--cd) + 1px) calc(var(--cb) + 1px) at 50% 50%, #000 99%, transparent 100%);
-  animation: vt-divide 1.5s cubic-bezier(.45, 0, .3, 1) both;
-}
-::view-transition-old(vt-cell), ::view-transition-new(vt-cell) { animation: none; }
-.vt-cell { position: fixed; inset: 0; z-index: 300; pointer-events: none; view-transition-name: vt-cell; animation: vt-divide 1.5s cubic-bezier(.45, 0, .3, 1) both, vt-membrane 1.5s ease both; }
-.vt-cell i { position: absolute; top: 50%; width: calc(var(--cr) * 2); height: calc(var(--cr) * 2); border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid var(--accent); box-shadow: 0 0 22px 2px color-mix(in srgb, var(--accent) 55%, transparent), inset 0 0 30px color-mix(in srgb, var(--accent) 30%, transparent); }
-.vt-cell i:first-child { left: calc(50% - var(--cd)); }
-.vt-cell i:last-child { left: calc(50% + var(--cd)); }
-.vt-cell i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, var(--blood), color-mix(in srgb, var(--blood) 30%, transparent) 70%, transparent); opacity: .75; }
-@keyframes vt-divide {
-  0% { --cr: 0px; --cd: 0px; --cb: 0px; }
-  24% { --cr: 9vmin; --cd: 0px; --cb: 9vmin; }
-  50% { --cr: 14vmin; --cd: 12vmin; --cb: 7vmin; }
-  66% { --cr: 20vmin; --cd: 24vmin; --cb: 0px; }
-  100% { --cr: 125vmax; --cd: 32vw; --cb: 0px; }
-}
-@keyframes vt-membrane { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+/* Mood transition: perfusion, drawn on this one-off canvas by moodTransition.ts. Section reveals spread in from the corner the same way (see .reveal). */
+.mood-perfusion { position: fixed; inset: 0; z-index: 400; width: 100%; height: 100%; pointer-events: none; }
 .brand { display: flex; align-items: center; margin-right: auto; }
 .brand-mark { font: 500 26px/1 var(--serif); letter-spacing: .02em; color: var(--accent); }
 .brand-name { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
