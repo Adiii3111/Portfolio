@@ -8,10 +8,12 @@ import { useEffect, useRef } from "react";
  * white cell with its lobed nucleus, and tiny platelets, all a little out of focus. The
  * flow surges on a lub-dub heartbeat.
  *
- * The DNA threads through the screen: it comes in at the top-right corner and breaks off
- * partway in (its strands unzipping, its base pairs snapping into loose stubs), then carries
- * on out of the bottom-left corner, heading up into the page, and breaks off again. Both
- * pieces flow in from their corners and turn as you scroll, in the mood's DNA colours.
+ * The DNA runs down the edges, half a screen each: one slim double helix comes down the
+ * right edge from the top, threaded through the chapter dots so they sit on it like base
+ * pairs, and fades out at the middle; the other rises up the left edge from the bottom and
+ * fades out at the middle too. As you scroll, each lights up from its own end in the mood's
+ * colours, so they fill towards each other as you read; the rest waits, faint. They fade in
+ * when the page opens and turn as you scroll.
  *
  * It's there to be played with, quietly:
  *  - the cursor is a hub: cells near it are pulled into a swirl and follow you around;
@@ -33,7 +35,7 @@ const rgba = (c: number[], a: number) => `rgba(${c[0]},${c[1]},${c[2]},${Math.ma
 const STEP = 4;          // px between backbone samples
 const RUNG = 12;         // px between base pairs (≈ 10.5 pairs per turn)
 const TWIST = (Math.PI * 2) / (RUNG * 10.5);
-const DNA_R = 22;        // helix radius (px)
+const SPINE_R = 15;      // helix radius (px)
 const GROOVE = 2.35;     // phase gap between the two backbones: major vs minor groove
 const FADE_IN = 1800;    // ms for the DNA to fade in on load
 
@@ -153,68 +155,80 @@ export default function HelixField() {
       return Math.min(1, age / 300) * Math.min(1, (DEPOT_LIFE - age) / 1000);
     };
 
-    // One broken piece of DNA, entering from (ox, oy) along (ux, uy). It runs for `len` px,
-    // then frays: past FRAY of the way along, the strands spread apart, the base pairs break
-    // into stubs and the whole thing fades out.
-    const FRAY = 0.7;
-    const drawPiece = (now: number, beat: number, ox: number, oy: number, ux: number, uy: number, len: number, phase0: number) => {
+    // The DNA spines. The right one sits on the chapter rail.
+    const railX = () => {
+      const dot = document.querySelector(".chapter-rail i")?.getBoundingClientRect();
+      return dot && dot.width ? dot.left + dot.width / 2 : W - 16;
+    };
+    let spineX = 0;
+    // One spine on x = cx, covering half the screen: the top half coming down (right), or the
+    // bottom half rising up (left). It's lit from its outer end by however far down the page
+    // you are, and fades out towards the middle of the screen where it stops.
+    const drawSpine = (now: number, beat: number, cx: number, fromBottom: boolean) => {
       const shown = born ? Math.min(1, (now - born) / FADE_IN) : 0;
       if (shown <= 0) return;
-      const R = W < 720 ? 12 : DNA_R;
-      const nx = -uy, ny = ux;
-      const flow = now * 0.02 + pos * 0.4;        // the pattern keeps coming in from the corner
-      const spin = pos * 0.004 + phase0;
-      const fray = (sx: number) => Math.max(0, (sx / len - FRAY) / (1 - FRAY));   // 0 … 1 over the broken end
-      const pt = (sx: number, phase: number) => {
-        const th = (sx - flow) * TWIST + spin + phase;
-        const off = Math.cos(th) * R * (1 + fray(sx) * 0.8);
-        return { x: ox + ux * sx + nx * off, y: oy + uy * sx + ny * off, z: Math.sin(th) };
+      const R = W < 720 ? 8 : SPINE_R;
+      const half = H / 2;
+      const y0 = fromBottom ? half : 0, y1 = fromBottom ? H : half;
+      const outer = fromBottom ? H : 0, inner = half;
+      const travel = (fromBottom ? -pos : pos) * 0.5;
+      const spin = pos * 0.004 + (fromBottom ? Math.PI : 0);
+      const max = Math.max(1, document.documentElement.scrollHeight - H);
+      const read = (pos / max) * half;            // how much of each spine is lit
+      const readY = fromBottom ? H - read : read;
+      const isLit = (sy: number) => (fromBottom ? sy >= readY : sy <= readY) ? 1 : 0;
+      const pt = (sy: number, phase: number) => {
+        const th = (sy + travel) * TWIST + spin + phase;
+        return { x: cx + Math.cos(th) * R, y: sy, z: Math.sin(th) };
       };
       const lift = beat * 0.06;
-      const tint = (a: number) => {
-        const t = ctx.createLinearGradient(ox, oy, ox + ux * len, oy + uy * len);
-        t.addColorStop(0, rgba(col.dnaA, a)); t.addColorStop(FRAY * 0.7, rgba(col.dnaB, a)); t.addColorStop(FRAY, rgba(col.dnaA, a)); t.addColorStop(1, rgba(col.dnaA, 0));
-        return t;
+      // Colour runs along the spine from its outer end, and fades to nothing at the middle.
+      const shade = (a: number, lit: boolean) => {
+        const g = ctx.createLinearGradient(0, outer, 0, inner);
+        g.addColorStop(0, rgba(col.dnaA, a)); g.addColorStop(0.55, rgba(lit ? col.dnaB : col.dnaA, a * 0.9)); g.addColorStop(1, rgba(col.dnaA, 0));
+        return g;
       };
       ctx.globalAlpha = shown * shown * (3 - 2 * shown);
       for (const front of [false, true]) {
-        const bb = new Path2D(), rung = new Path2D();
-        const first = Math.ceil(flow / RUNG) * RUNG - flow;
-        for (let sx = first; sx < len; sx += RUNG) {
-          const a = pt(sx, 0), b = pt(sx, GROOVE);
+        // [faint, lit] paths for backbones and base pairs.
+        const bb = [new Path2D(), new Path2D()], rung = [new Path2D(), new Path2D()];
+        const first = Math.ceil((y0 + travel) / RUNG) * RUNG - travel;
+        for (let sy = first; sy < y1; sy += RUNG) {
+          const a = pt(sy, 0), b = pt(sy, GROOVE);
           if (((a.z + b.z) / 2 >= 0) !== front) continue;
-          const f = fray(sx);
-          if (f <= 0) { rung.moveTo(a.x, a.y); rung.lineTo(b.x, b.y); continue; }
-          // Broken: each base keeps a shrinking stub, and some are gone altogether.
-          const k = Math.round((sx + flow) / RUNG);
-          if (((k * 7919) % 7) / 7 < f * 0.6) continue;
-          const stub = 0.42 * (1 - f * 0.7);
-          rung.moveTo(a.x, a.y); rung.lineTo(a.x + (b.x - a.x) * stub, a.y + (b.y - a.y) * stub);
-          rung.moveTo(b.x, b.y); rung.lineTo(b.x + (a.x - b.x) * stub, b.y + (a.y - b.y) * stub);
+          const lit = isLit(sy);
+          rung[lit].moveTo(a.x, a.y); rung[lit].lineTo(b.x, b.y);
         }
         for (const phase of [0, GROOVE]) {
-          let prev = pt(0, phase);
-          for (let sx = STEP; sx <= len; sx += STEP) {
-            const q = pt(sx, phase);
-            if (((q.z + prev.z) / 2 >= 0) === front) { bb.moveTo(prev.x, prev.y); bb.lineTo(q.x, q.y); }
+          let prev = pt(y0, phase);
+          for (let sy = y0 + STEP; sy <= y1; sy += STEP) {
+            const q = pt(sy, phase);
+            if (((q.z + prev.z) / 2 >= 0) === front) { const lit = isLit(sy); bb[lit].moveTo(prev.x, prev.y); bb[lit].lineTo(q.x, q.y); }
             prev = q;
           }
         }
         const d = front ? 1 : 0.45;
-        ctx.lineWidth = front ? 1.4 : 1;
-        ctx.strokeStyle = tint((0.4 + lift) * d); ctx.stroke(rung);
-        ctx.lineWidth = front ? 2.4 : 1.5;
-        ctx.strokeStyle = tint((0.8 + lift) * d); ctx.stroke(bb);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = shade(0.08 * d, false); ctx.stroke(rung[0]);
+        ctx.strokeStyle = shade((0.4 + lift) * d, true); ctx.stroke(rung[1]);
+        ctx.lineWidth = front ? 1.8 : 1.2;
+        ctx.strokeStyle = shade(0.14 * d, false); ctx.stroke(bb[0]);
+        ctx.strokeStyle = shade((0.8 + lift) * d, true); ctx.stroke(bb[1]);
+      }
+      // The reading line itself: a soft glow where lit meets faint.
+      if (read > 2) {
+        const glow = ctx.createRadialGradient(cx, readY, 0, cx, readY, R * 2.4);
+        glow.addColorStop(0, rgba(col.dnaB, (0.5 + lift) * (1 - read / half))); glow.addColorStop(1, rgba(col.dnaB, 0));
+        ctx.fillStyle = glow;
+        ctx.fillRect(cx - R * 2.4, readY - R * 2.4, R * 4.8, R * 4.8);
       }
       ctx.globalAlpha = 1;
     };
 
-    // In at the top-right corner, out of the bottom-left one, each breaking off partway in.
     const drawHelix = (now: number, beat: number) => {
-      const len = Math.min(Math.max(W, H) * 0.42, 620);
-      const ux = -0.6, uy = 0.8;
-      drawPiece(now, beat, W + 30, -30, ux, uy, len, 0);
-      drawPiece(now, beat, -30, H + 30, -ux, -uy, len, Math.PI);
+      drawSpine(now, beat, spineX, false);
+      // The left spine sits in the page margin, so it only shows where there is margin to spare.
+      if (W >= 720) drawSpine(now, beat, Math.max(22, Math.min(46, (W - 1240) / 4 + 12)), true);
     };
 
     const draw = (now: number, beat: number) => {
@@ -335,11 +349,12 @@ export default function HelixField() {
       if (depots.length > MAX_DEPOTS) depots.shift();
     };
     const onLeave = () => { mouse.on = false; };
-    const onResize = () => { resize(); if (reduced) still(); };
+    const onResize = () => { resize(); spineX = railX(); if (reduced) still(); };
     const onVis = () => (document.hidden ? stop() : start());
     const mood = new MutationObserver(() => { readColours(); if (reduced) still(); });
 
-    readColours(); resize();
+    readColours(); resize(); spineX = railX();
+    const settle = setTimeout(() => { spineX = railX(); }, 600);   // the rail may lay out after this runs
     born = performance.now();
     if (reduced) still(); else start();
     mood.observe(document.documentElement, { attributes: true, attributeFilter: ["data-time"] });
@@ -352,7 +367,7 @@ export default function HelixField() {
     document.documentElement.addEventListener("pointerleave", onLeave);
     document.addEventListener("visibilitychange", onVis);
     return () => {
-      stop(); mood.disconnect();
+      stop(); mood.disconnect(); clearTimeout(settle);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onMove);
