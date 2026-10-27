@@ -62,10 +62,13 @@ export default function InfinityMark({ size = 36, speed = 1 }: { size?: number; 
       ctx.shadowBlur = 0;
     };
 
+    let drawn = 0;
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
       if (last) clock += (t - last) * speedRef.current;
       last = t;
+      if (t - drawn < 33) return;   // ~30 fps is smooth enough for a slow tumble
+      drawn = t;
       draw(clock);
     };
     readAccent();

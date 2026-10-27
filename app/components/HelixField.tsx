@@ -22,7 +22,7 @@ import { useEffect, useRef } from "react";
  *    from the click.
  * Everything stays faint and only brightens near the cursor, so the content stays first.
  *
- * Drawn at ~30 fps and 1 device pixel per CSS pixel (the glass cards blur whatever is
+ * Drawn at ~24 fps and 1 device pixel per CSS pixel (the glass cards blur whatever is
  * behind them, so every frame here costs a re-blur); paused while the tab is hidden, and a
  * single still frame for reduced motion.
  */
@@ -85,6 +85,27 @@ export default function HelixField() {
     const waves: Wave[] = [];
     const mouse = { x: -1, y: -1, on: false };   // on: over open space
     let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91], dnaA: [158, 231, 255], dnaB: [255, 179, 199], white: [236, 236, 246], nucleus: [150, 110, 196], platelet: [232, 206, 160] };
+    // Pre-drawn cells, rebuilt when the mood changes (drawn at full strength; alpha is applied when stamped).
+    const SPRITE = 32;
+    const sprite = () => { const c = document.createElement("canvas"); c.width = c.height = SPRITE; return c; };
+    const sprites = { red: sprite(), white: sprite() };
+    const makeSprites = () => {
+      const h = SPRITE / 2;
+      const rc = sprites.red.getContext("2d"), wc = sprites.white.getContext("2d");
+      if (!rc || !wc) return;
+      rc.clearRect(0, 0, SPRITE, SPRITE);
+      let g = rc.createRadialGradient(h, h, 0, h, h, h);
+      g.addColorStop(0, rgba(col.red, 0.35)); g.addColorStop(0.5, rgba(col.red, 0.55)); g.addColorStop(0.78, rgba(col.red, 1)); g.addColorStop(1, rgba(col.red, 0));
+      rc.fillStyle = g; rc.beginPath(); rc.arc(h, h, h, 0, Math.PI * 2); rc.fill();
+      wc.clearRect(0, 0, SPRITE, SPRITE);
+      g = wc.createRadialGradient(h, h, 0, h, h, h);
+      g.addColorStop(0, rgba(col.white, 0.7)); g.addColorStop(0.8, rgba(col.white, 0.9)); g.addColorStop(1, rgba(col.white, 0));
+      wc.fillStyle = g; wc.beginPath(); wc.arc(h, h, h, 0, Math.PI * 2); wc.fill();
+      wc.fillStyle = rgba(col.nucleus, 1);
+      wc.beginPath();
+      for (let k = 0; k < 3; k++) { const q = k * 2.1; wc.moveTo(h + Math.cos(q) * h * 0.32 + h * 0.24, h + Math.sin(q) * h * 0.32); wc.arc(h + Math.cos(q) * h * 0.32, h + Math.sin(q) * h * 0.32, h * 0.24, 0, Math.PI * 2); }
+      wc.fill();
+    };
     let dnaK = 1;   // how strongly the DNA is drawn in this mood (--dna-strength: light moods need more)
     let redK = 1;   // red cells are dark red specks on the dark moods, so they get a boost there (--cell-red-boost)
     const readColours = () => {
@@ -92,6 +113,7 @@ export default function HelixField() {
       dnaK = parseFloat(cs.getPropertyValue("--dna-strength")) || 1;
       redK = parseFloat(cs.getPropertyValue("--cell-red-boost")) || 1;
       col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199"), white: readRGB("--cell-white", "236,236,246"), nucleus: readRGB("--cell-nucleus", "150,110,196"), platelet: readRGB("--cell-platelet", "232,206,160") };
+      makeSprites();
     };
 
     const spawn = (edge: boolean): Part => {
@@ -243,41 +265,31 @@ export default function HelixField() {
       ctx.clearRect(0, 0, W, H);
       drawHelix(now, beat);
 
-      // Blood cells, smaller and fainter the further away they are.
+      // Blood cells, smaller and fainter the further away they are. Each kind is drawn once into a
+      // sprite (see makeSprites) and stamped here, turned and squashed, which is far cheaper
+      // than building a gradient for every cell on every frame.
       //  red: a biconcave disc, brighter at the rim than in the dimple, face-on or edge-on as it tumbles;
       //  white: a larger pale cell with a lobed nucleus;
       //  platelet: a tiny irregular fragment.
       for (const p of parts) {
         const a = (0.1 + p.z * 0.16) + Math.min(1, p.glow) * 0.4;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.spin);
-        if (p.kind === "red") {
-          const r = 3 + p.z * 4.5;
-          ctx.scale(1, 0.35 + 0.65 * Math.abs(Math.cos(p.tumble)));
-          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-          const ar = a * redK;
-          g.addColorStop(0, rgba(col.red, ar * 0.35)); g.addColorStop(0.5, rgba(col.red, ar * 0.55));
-          g.addColorStop(0.78, rgba(col.red, ar)); g.addColorStop(1, rgba(col.red, 0));
-          ctx.fillStyle = g;
-          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
-        } else if (p.kind === "white") {
-          const r = 4.5 + p.z * 4.5;
-          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-          g.addColorStop(0, rgba(col.white, a * 0.7)); g.addColorStop(0.8, rgba(col.white, a * 0.9)); g.addColorStop(1, rgba(col.white, 0));
-          ctx.fillStyle = g;
-          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = rgba(col.nucleus, a * 1.4);
-          ctx.beginPath();
-          for (let k = 0; k < 3; k++) { const q = k * 2.1 + p.tumble * 0.2; ctx.moveTo(Math.cos(q) * r * 0.32 + r * 0.24, Math.sin(q) * r * 0.32); ctx.arc(Math.cos(q) * r * 0.32, Math.sin(q) * r * 0.32, r * 0.24, 0, Math.PI * 2); }
-          ctx.fill();
-        } else {
+        const cos = Math.cos(p.spin), sin = Math.sin(p.spin);
+        if (p.kind === "platelet") {
           const r = 1.2 + p.z * 1.4;
-          ctx.fillStyle = rgba(col.platelet, a * 1.6);
-          ctx.beginPath(); ctx.ellipse(0, 0, r * 1.4, r, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = Math.min(1, a * 1.6);
+          ctx.fillStyle = rgba(col.platelet, 1);
+          ctx.beginPath(); ctx.ellipse(p.x, p.y, r * 1.4, r, p.spin, 0, Math.PI * 2); ctx.fill();
+          continue;
         }
-        ctx.restore();
+        const red = p.kind === "red";
+        const r = red ? 3 + p.z * 4.5 : 4.5 + p.z * 4.5;
+        const squash = red ? 0.35 + 0.65 * Math.abs(Math.cos(p.tumble)) : 1;
+        ctx.globalAlpha = Math.min(1, red ? a * redK : a);
+        ctx.setTransform(cos, sin, -sin * squash, cos * squash, p.x, p.y);
+        ctx.drawImage(red ? sprites.red : sprites.white, -r, -r, r * 2, r * 2);
       }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
 
       // The hub: a faint ring that beats with the heart.
       if (mouse.on) {
@@ -321,7 +333,7 @@ export default function HelixField() {
 
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
-      if (last && t - last < 30) return;   // ~30 fps is plenty for a background
+      if (last && t - last < 40) return;   // ~24 fps is plenty for a slow background, and each frame re-blurs the glass cards
       last = t;
       const d = target - pos;
       pos += Math.abs(d) < 0.3 ? d : d * 0.22;

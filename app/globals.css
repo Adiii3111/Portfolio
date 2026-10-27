@@ -42,7 +42,7 @@
   --glass: linear-gradient(180deg, #F4F0E81a, #F4F0E806), #0E192Ccc;
   --glass-edge: #F4F0E824;
   --glass-shadow: inset 0 1px 0 #F4F0E83d, inset 0 -1px 0 #F4F0E80d, 0 18px 44px -12px #0008;
-  --glass-blur: blur(16px) saturate(165%);
+  --glass-blur: blur(11px) saturate(150%);   /* every background frame re-blurs this, so it's kept light */
   --blood: #E8615B;
   --ok: #8BD3A5;
   --bad: #EE9A82;
@@ -82,7 +82,7 @@
   --glass: linear-gradient(180deg, #FFFFFFcc, #FFFFFF80), #E2ECF18c;
   --blood: #B02A35;
   --sky: radial-gradient(70% 60% at 0% 100%, #FFD7BD8c, transparent 70%), radial-gradient(60% 50% at 100% 0%, #FFFFFF99, transparent 70%);
-  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53; --dna-a: 26, 106, 118; --dna-b: 176, 42, 53; --dna-strength: 1.7; --map-land: .42; --cell-white: 120, 130, 160; --cell-nucleus: 104, 70, 150; --cell-platelet: 170, 128, 70;
+  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53; --dna-a: 26, 106, 118; --dna-b: 176, 42, 53; --dna-strength: 1.7; --map-land: .75; --map-ink: color-mix(in srgb, var(--accent) 80%, var(--fg)); --cell-white: 120, 130, 160; --cell-nucleus: 104, 70, 150; --cell-platelet: 170, 128, 70;
 }
 :root[data-time="afternoon"] {
  --on-accent: #FFFFFF; --vignette: 7%;
@@ -92,7 +92,7 @@
   --glass: linear-gradient(180deg, #FFFDF6d6, #FFFDF68a), #F6EEDC8c;
   --blood: #A3262A;
   --sky: radial-gradient(55% 45% at 92% -5%, #FFE7A3b3, transparent 70%), radial-gradient(80% 60% at 0% 100%, #F2D9AE59, transparent 70%);
-  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40; --dna-a: 156, 90, 18; --dna-b: 168, 40, 40; --dna-strength: 2.2; --map-land: .42; --cell-white: 130, 120, 140; --cell-nucleus: 110, 70, 140; --cell-platelet: 176, 124, 50;
+  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40; --dna-a: 156, 90, 18; --dna-b: 168, 40, 40; --dna-strength: 2.2; --map-land: .75; --map-ink: color-mix(in srgb, var(--accent) 80%, var(--fg)); --cell-white: 130, 120, 140; --cell-nucleus: 110, 70, 140; --cell-platelet: 176, 124, 50;
 }
 :root[data-time="evening"] {
  --on-accent: #1B1322; --vignette: 24%;
@@ -160,9 +160,9 @@ html.js-reveal .reveal.in { opacity: 1; animation: rv-perfuse 1.2s var(--perfuse
 @keyframes rv-perfuse { from { clip-path: circle(0% at 0% 0%); } to { clip-path: circle(150% at 0% 0%); } }
 
 /* Maps (shared) */
-/* Map colours follow the mood (--map-land sets how strong the land dots are in each). */
-.map-land { fill: var(--accent); opacity: var(--map-land, .28); }
-.map-route { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.6s var(--ease); }
+/* Map colours follow the mood: --map-land sets how strong the land dots are, and the day moods use a deeper ink (--map-ink) so the map reads on their pale backgrounds. */
+.map-land { fill: var(--map-ink, var(--accent)); opacity: var(--map-land, .28); }
+.map-route { fill: none; stroke: var(--map-ink, var(--accent)); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.6s var(--ease); }
 .map-route.drawn { stroke-dashoffset: 0; }
 .map-marker-dot { fill: var(--fg); stroke: var(--bg); stroke-width: 2.5; }
 .map-marker-ring { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
