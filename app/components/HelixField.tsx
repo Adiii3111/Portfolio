@@ -85,7 +85,11 @@ export default function HelixField() {
     const waves: Wave[] = [];
     const mouse = { x: -1, y: -1, on: false };   // on: over open space
     let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91], dnaA: [158, 231, 255], dnaB: [255, 179, 199], white: [236, 236, 246], nucleus: [150, 110, 196], platelet: [232, 206, 160] };
-    const readColours = () => { col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199"), white: readRGB("--cell-white", "236,236,246"), nucleus: readRGB("--cell-nucleus", "150,110,196"), platelet: readRGB("--cell-platelet", "232,206,160") }; };
+    let dnaK = 1;   // how strongly the DNA is drawn in this mood (--dna-strength: light moods need more)
+    const readColours = () => {
+      dnaK = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--dna-strength")) || 1;
+      col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199"), white: readRGB("--cell-white", "236,236,246"), nucleus: readRGB("--cell-nucleus", "150,110,196"), platelet: readRGB("--cell-platelet", "232,206,160") };
+    };
 
     const spawn = (edge: boolean): Part => {
       let x = Math.random() * W, y = Math.random() * H;
@@ -209,11 +213,11 @@ export default function HelixField() {
         }
         const d = front ? 1 : 0.45;
         ctx.lineWidth = 1;
-        ctx.strokeStyle = shade(0.08 * d, false); ctx.stroke(rung[0]);
-        ctx.strokeStyle = shade((0.4 + lift) * d, true); ctx.stroke(rung[1]);
+        ctx.strokeStyle = shade(0.11 * d * dnaK, false); ctx.stroke(rung[0]);
+        ctx.strokeStyle = shade((0.4 + lift) * d * dnaK, true); ctx.stroke(rung[1]);
         ctx.lineWidth = front ? 1.8 : 1.2;
-        ctx.strokeStyle = shade(0.14 * d, false); ctx.stroke(bb[0]);
-        ctx.strokeStyle = shade((0.8 + lift) * d, true); ctx.stroke(bb[1]);
+        ctx.strokeStyle = shade(0.2 * d * dnaK, false); ctx.stroke(bb[0]);
+        ctx.strokeStyle = shade((0.8 + lift) * d * dnaK, true); ctx.stroke(bb[1]);
       }
       // The reading line itself: a soft glow where lit meets faint.
       if (read > 2) {

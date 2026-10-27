@@ -9,13 +9,13 @@ export function finishIntro() {
 
 // Timeline (ms).
 const GROW = [100, 1000];     // the helix grows out from the middle of the screen
-const UNZIP = [1650, 2600];   // it unzips and the two strands sweep off to the edges
-const END = 3300;
+const UNZIP = [2150, 3100];   // it unzips and the two strands sweep off to the edges
+const END = 3850;
 
 const smooth = (t: number, a: number, b: number) => { const x = Math.max(0, Math.min(1, (t - a) / (b - a))); return x * x * (3 - 2 * x); };
 
 /**
- * A ~3.2s opening sequence: a DNA double helix grows out from the middle of a dark screen,
+ * A ~3.75s opening sequence: a DNA double helix grows out from the middle of a dark screen,
  * base pairs popping in as it turns, and Aditya's name comes up across it. Then it unzips:
  * one strand sweeps off to the top-right edge and the other to the bottom-left, where the
  * page's two DNA spines live, and the screen opens onto the page.
@@ -109,7 +109,6 @@ export default function Intro() {
       <canvas ref={ref} className="intro-dna" aria-hidden="true" />
       <div className="intro-id">
         <h2>Aditya Kadlabal Sripad</h2>
-        <p>Healthcare · Supply Chain · Analytics</p>
       </div>
       <button className="intro-skip" onClick={(e) => { e.stopPropagation(); finishIntro(); }}>Skip intro →</button>
     </div>

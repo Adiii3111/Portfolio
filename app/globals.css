@@ -17,7 +17,7 @@
   --gutter: max(22px, calc((100% - 1240px) / 2));
   --ease: cubic-bezier(.2, .7, .2, 1);
   --perfuse-ease: cubic-bezier(.4, 0, .2, 1);
-  --hd: 2.75s; /* hero entrance delay while the intro plays */
+  --hd: 3.3s; /* hero entrance delay while the intro plays */
   --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
 }
 
@@ -80,7 +80,7 @@
   --glass: linear-gradient(180deg, #FFFFFFcc, #FFFFFF80), #E2ECF18c;
   --blood: #B02A35;
   --sky: radial-gradient(70% 60% at 0% 100%, #FFD7BD8c, transparent 70%), radial-gradient(60% 50% at 100% 0%, #FFFFFF99, transparent 70%);
-  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53; --dna-a: 26, 106, 118; --dna-b: 176, 42, 53; --cell-white: 120, 130, 160; --cell-nucleus: 104, 70, 150; --cell-platelet: 170, 128, 70;
+  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53; --dna-a: 26, 106, 118; --dna-b: 176, 42, 53; --dna-strength: 1.7; --map-land: .42; --cell-white: 120, 130, 160; --cell-nucleus: 104, 70, 150; --cell-platelet: 170, 128, 70;
 }
 :root[data-time="afternoon"] {
   --bg: #F6EEDC; --bg-top: #FBF5E6; --bg-2: #EFE4CD; --band: #FFFFFF52;
@@ -89,7 +89,7 @@
   --glass: linear-gradient(180deg, #FFFDF6d6, #FFFDF68a), #F6EEDC8c;
   --blood: #A3262A;
   --sky: radial-gradient(55% 45% at 92% -5%, #FFE7A3b3, transparent 70%), radial-gradient(80% 60% at 0% 100%, #F2D9AE59, transparent 70%);
-  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40; --dna-a: 156, 90, 18; --dna-b: 168, 40, 40; --cell-white: 130, 120, 140; --cell-nucleus: 110, 70, 140; --cell-platelet: 176, 124, 50;
+  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40; --dna-a: 156, 90, 18; --dna-b: 168, 40, 40; --dna-strength: 1.7; --map-land: .42; --cell-white: 130, 120, 140; --cell-nucleus: 110, 70, 140; --cell-platelet: 176, 124, 50;
 }
 :root[data-time="evening"] {
   --bg: #1B1322; --bg-top: #24172B; --bg-2: #22182A; --band: #FFFFFF05;
@@ -98,13 +98,13 @@
   --glass: linear-gradient(180deg, #F3E7E114, #F3E7E105), #1F1628cc;
   --blood: #F06A5C;
   --sky: radial-gradient(110% 55% at 50% 115%, #E9714A6b, #9B3F6A26 45%, transparent 75%);
-  --field-a: 196, 128, 140; --field-b: 242, 145, 106; --field-hot: 240, 106, 92; --dna-a: 242, 145, 106; --dna-b: 214, 150, 226; --cell-white: 240, 228, 240; --cell-nucleus: 170, 120, 200; --cell-platelet: 245, 205, 150;
+  --field-a: 196, 128, 140; --field-b: 242, 145, 106; --field-hot: 240, 106, 92; --dna-a: 242, 145, 106; --dna-b: 214, 150, 226; --dna-strength: 1.15; --map-land: .34; --cell-white: 240, 228, 240; --cell-nucleus: 170, 120, 200; --cell-platelet: 245, 205, 150;
 }
 :root[data-time="night"], :root:not([data-time]) {
   --bg: #04070D; --bg-top: #08101E; --bg-2: #0A1220;
   --glass: linear-gradient(180deg, #F4F0E814, #F4F0E805), #0A1220cc;
   --sky: radial-gradient(45% 40% at 12% -5%, #8FA8D62e, transparent 70%);
-  --field-a: 150, 135, 105; --field-b: 226, 205, 164; --field-hot: 232, 97, 91; --dna-a: 226, 205, 164; --dna-b: 158, 222, 255; --cell-white: 236, 236, 246; --cell-nucleus: 150, 110, 196; --cell-platelet: 232, 206, 160;
+  --field-a: 150, 135, 105; --field-b: 226, 205, 164; --field-hot: 232, 97, 91; --dna-a: 226, 205, 164; --dna-b: 158, 222, 255; --dna-strength: 1; --map-land: .28; --cell-white: 236, 236, 246; --cell-nucleus: 150, 110, 196; --cell-platelet: 232, 206, 160;
 }
 
 /* Dark "instrument" surfaces keep dark tokens whatever the page theme is. */
@@ -155,22 +155,22 @@ html.js-reveal .reveal.in { opacity: 1; animation: rv-perfuse 1.2s var(--perfuse
 @keyframes rv-perfuse { from { clip-path: circle(0% at 0% 0%); } to { clip-path: circle(150% at 0% 0%); } }
 
 /* Maps (shared) */
-.map-land { fill: var(--gold); opacity: .2; }
-.map-route { fill: none; stroke: var(--gold-light); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.6s var(--ease); }
+/* Map colours follow the mood (--map-land sets how strong the land dots are in each). */
+.map-land { fill: var(--accent); opacity: var(--map-land, .28); }
+.map-route { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.6s var(--ease); }
 .map-route.drawn { stroke-dashoffset: 0; }
 .map-marker-dot { fill: var(--fg); }
-.map-marker-ring { fill: none; stroke: var(--gold); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
-.map-marker.is-current .map-marker-dot { fill: var(--gold); }
+.map-marker-ring { fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.map-marker.is-current .map-marker-dot { fill: var(--accent); }
 .map-marker.is-current .map-marker-ring { animation: ping 2.4s ease-out infinite; }
 
 /* ═════════════════════ Intro ═════════════════════ */
 /* Opening: a DNA helix grows, the name comes up, the helix unzips to the edges (Intro.tsx). */
-.intro { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 45%, #101b30, #04070D 72%); cursor: pointer; animation: introOut .6s ease 2.6s forwards; }
+.intro { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 45%, #101b30, #04070D 72%); cursor: pointer; animation: introOut .6s ease 3.15s forwards; }
 html[data-intro="done"] .intro { display: none; }
 .intro-dna { position: absolute; inset: 0; width: 100%; height: 100%; }
-.intro-id { position: relative; display: grid; justify-items: center; gap: 14px; padding: 22px 30px; text-align: center; background: radial-gradient(closest-side, #04070Dd9, #04070D00); opacity: 0; animation: introId 1.55s var(--ease) .55s both; }
+.intro-id { position: relative; display: grid; justify-items: center; gap: 14px; padding: 22px 30px; text-align: center; background: radial-gradient(closest-side, #04070Dd9, #04070D00); opacity: 0; animation: introId 2.1s var(--ease) .55s both; }
 .intro-id h2 { font: 500 clamp(26px, 4.2vw, 58px)/1.05 var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--ivory); }
-.intro-id p { font-size: 11px; font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: var(--gold-light); }
 @keyframes introId { 0% { opacity: 0; transform: translateY(14px); filter: blur(6px); } 30%, 72% { opacity: 1; transform: none; filter: none; } 100% { opacity: 0; transform: scale(1.03); filter: blur(4px); } }
 .intro-skip { position: absolute; right: 24px; bottom: 24px; z-index: 2; padding: 11px 18px; border: 1px solid #F4F0E840; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ivory); transition: border-color .3s, color .3s; }
 .intro-skip:hover { border-color: var(--gold); color: var(--gold-light); }
@@ -357,10 +357,10 @@ html[data-intro="done"] .intro { display: none; }
 .journey-sticky { position: sticky; top: 110px; }
 .journey-map { position: relative; aspect-ratio: 230 / 72; }
 .journey-map svg { width: 100%; height: 100%; overflow: visible; }
-.journey-map .map-land { opacity: .22; }
+.journey-map .map-land { opacity: var(--map-land, .28); }
 .journey-map .map-route { transition: none; }
 .journey-plane { opacity: 0; transition: opacity .5s ease; }
-.journey-plane path { fill: var(--fg); stroke: var(--bg); stroke-width: .8; filter: drop-shadow(0 0 5px #E2CDA4cc); }
+.journey-plane path { fill: var(--fg); stroke: var(--bg); stroke-width: .8; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 80%, transparent)); }
 .journey-plane.is-flying { opacity: 1; }
 .journey-plane.is-parked { opacity: .9; }
 .journey-pin { position: absolute; transform: translate(-50%, -190%); font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); white-space: nowrap; transition: color .4s; }
