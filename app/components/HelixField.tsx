@@ -3,18 +3,16 @@
 import { useEffect, useRef } from "react";
 
 /*
- * The site-wide backdrop: circulation. Small medical crosses and parcels stream across the
- * whole screen along slow, branching currents (a medical supply network), and the flow
- * surges on a lub-dub heartbeat. A straight DNA double helix in light, bright colours runs
- * down the middle; it fades in when the page opens and turns slowly as you scroll.
+ * The site-wide backdrop: circulation. Red blood cells drift across the whole screen on
+ * slow, branching currents, as if seen under a microscope: soft, a little out of focus,
+ * tumbling as they go, and the flow surges on a lub-dub heartbeat. A straight DNA double
+ * helix in light, bright colours runs down the middle; it fades in when the page opens and
+ * turns as you scroll.
  *
  * It's there to be played with, quietly:
- *  - the DNA won't be touched: bring the cursor near and the whole strand slides away to
- *    one side (the part nearest the cursor leaning furthest), drifting back when you leave;
- *  - the cursor is a hub: traffic near it is pulled into a swirl and follows you around;
- *  - clicking open space drops a clinic (a cross in a diamond) that draws traffic in, each
- *    arrival "delivered" with a pulse, and sends a heartbeat shockwave out from the click;
- *  - dragging across open space turns the helix by hand.
+ *  - the cursor is a hub: cells near it are pulled into a swirl and follow you around;
+ *  - clicking open space drops a clinic (a cross in a diamond) that draws cells in, each
+ *    arrival "delivered" with a pulse, and sends a heartbeat shockwave out from the click.
  * Everything stays faint and only brightens near the cursor, so the content stays first.
  *
  * Drawn at ~30 fps and 1 device pixel per CSS pixel (the glass cards blur whatever is
@@ -32,20 +30,21 @@ const RUNG = 46;         // px between base pairs (≈ 10.5 pairs per turn)
 const TWIST = (Math.PI * 2) / (RUNG * 10.5);
 const GROOVE = 2.35;     // phase gap between the two backbones: major vs minor groove
 const LEVELS = 4;        // depth bands, batched
-const SHY = 150;         // the gap (px) the DNA keeps between its strands and the cursor
 const FADE_IN = 1800;    // ms for the DNA to fade in on load
 
 // Circulation.
-const DENSITY = 1 / 8500;   // particles per px²
-const MAX_PARTS = 200;
-const SPEED = 0.85;         // px per frame at rest
+const DENSITY = 1 / 34000;  // cells per px²
+const MAX_PARTS = 48;
+const SPEED = 0.42;         // px per frame at rest, for a cell in the middle distance
 const HUB_R = 170;          // cursor hub radius
 const DEPOT_R = 230;        // how far a clinic reaches
 const DEPOT_LIFE = 14000;   // ms
 const MAX_DEPOTS = 4;
 const BEAT_MS = 1500;       // one heartbeat
 
-type Part = { x: number; y: number; vx: number; vy: number; cross: boolean; glow: number };
+// A blood cell: z is its depth (0 far, 1 near), which sets its size, speed and focus; spin
+// and tumble turn it as it drifts.
+type Part = { x: number; y: number; vx: number; vy: number; z: number; spin: number; tumble: number; glow: number };
 type Depot = { x: number; y: number; born: number; hits: number[] };
 type Wave = { x: number; y: number; born: number };
 
@@ -70,19 +69,19 @@ export default function HelixField() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let W = 0, H = 0, raf = 0, last = 0;
     let target = window.scrollY, pos = target, lastScroll = target;
-    let turn = 0, spinV = 0, dodge = 0, born = 0;   // dodge: how far (px) the DNA has slid away from the cursor
-    let drag: { x: number; y: number; moved: number } | null = null;
+    let born = 0;
+    let press: { x: number; y: number; moved: number } | null = null;   // a pointer down on open space, to tell a click from a drag
     let parts: Part[] = [];
     const depots: Depot[] = [];
     const waves: Wave[] = [];
-    const mouse = { x: -1, y: -1, on: false, in: false };   // on: over open space; in: anywhere in the window
+    const mouse = { x: -1, y: -1, on: false };   // on: over open space
     let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91], dnaA: [158, 231, 255], dnaB: [255, 179, 199] };
     const readColours = () => { col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199") }; };
 
     const spawn = (edge: boolean): Part => {
       let x = Math.random() * W, y = Math.random() * H;
       if (edge) { if (Math.random() < 0.5) x = Math.random() < 0.5 ? -4 : W + 4; else y = Math.random() < 0.5 ? -4 : H + 4; }
-      return { x, y, vx: 0, vy: 0, cross: Math.random() < 0.55, glow: 0 };
+      return { x, y, vx: 0, vy: 0, z: Math.random(), spin: Math.random() * Math.PI, tumble: Math.random() * Math.PI * 2, glow: 0 };
     };
 
     const resize = () => {
@@ -105,7 +104,8 @@ export default function HelixField() {
         const p = parts[i];
         p.y -= dy;
         const a = flowAngle(p.x, p.y + pos * 0.35, now);
-        let tx = Math.cos(a) * SPEED * surge, ty = Math.sin(a) * SPEED * surge;
+        const sp = SPEED * surge * (0.5 + p.z);
+        let tx = Math.cos(a) * sp, ty = Math.sin(a) * sp;
         let near = 0;
 
         if (mouse.on) {
@@ -133,6 +133,7 @@ export default function HelixField() {
         p.vy += (ty - p.vy) * 0.09;
         p.x += p.vx; p.y += p.vy;
         p.glow = Math.max(p.glow * 0.94, near);
+        p.spin += 0.004; p.tumble += 0.012 + p.z * 0.01;
         if (p.x < -30 || p.x > W + 30 || p.y < -30 || p.y > H + 30) parts[i] = spawn(true);
       }
       for (let i = depots.length - 1; i >= 0; i--) depots[i].hits = depots[i].hits.filter((h) => now - h < 700);
@@ -144,19 +145,17 @@ export default function HelixField() {
       return Math.min(1, age / 300) * Math.min(1, (DEPOT_LIFE - age) / 1000);
     };
 
-    // The DNA: straight down the middle (or wherever it has slid to, away from the cursor), its
-    // colour blending from one light tone to the other and back along its length.
+    // The DNA: straight down the middle, its colour blending from one light tone to the other
+    // and back along its length.
     const drawHelix = (now: number, beat: number) => {
       const R = Math.min(W * 0.2, 250);
       const travel = pos * 0.55;                  // we move down the strand slower than the page
-      const spin = pos * 0.0032 + turn;           // scrolling turns it, and so does a drag
+      const spin = pos * 0.0032;                  // scrolling turns it
       const cx = W / 2;
       const y0 = -RUNG * 2, y1 = H + RUNG * 2;
-      // The part nearest the cursor leans away a little further than the rest.
-      const lean = (y: number) => dodge * (0.75 + 0.25 * Math.exp(-(((y - mouse.y) / 260) ** 2)));
       const pt = (sy: number, phase: number) => {
         const th = (sy + travel) * TWIST + spin + phase;
-        return { x: cx + lean(sy) + Math.cos(th) * R, y: sy, z: Math.sin(th) };
+        return { x: cx + Math.cos(th) * R, y: sy, z: Math.sin(th) };
       };
       const level = (z: number) => Math.min(LEVELS - 1, Math.floor((0.5 + z * 0.5) * LEVELS));
       const lift = beat * 0.05;
@@ -210,24 +209,24 @@ export default function HelixField() {
       ctx.clearRect(0, 0, W, H);
       drawHelix(now, beat);
 
-      // Traffic: small medical crosses and parcels (a box with its tape), upright and rigid.
-      // Faint as a rule, brighter for whatever the cursor or a clinic has hold of.
-      const cross = [new Path2D(), new Path2D()], box = [new Path2D(), new Path2D()], tape = [new Path2D(), new Path2D()]; // [normal, hot]
+      // Blood cells: biconcave discs, brighter at the rim than in the dimple, seen face-on or
+      // edge-on as they tumble. Far ones are small, faint and soft; near ones larger and clearer.
       for (const p of parts) {
-        const h = p.glow > 0.25 ? 1 : 0;
-        if (p.cross) {
-          cross[h].rect(p.x - 3.2, p.y - 1, 6.4, 2); cross[h].rect(p.x - 1, p.y - 3.2, 2, 6.4);
-        } else {
-          box[h].rect(p.x - 3, p.y - 2.4, 6, 4.8);
-          tape[h].moveTo(p.x, p.y - 2.4); tape[h].lineTo(p.x, p.y + 2.4);
-        }
-      }
-      for (const h of [0, 1]) {
-        const a = h ? 0.85 : 0.3;
-        ctx.fillStyle = rgba(col.red, a); ctx.fill(cross[h]);
-        ctx.lineWidth = h ? 1.3 : 1;
-        ctx.strokeStyle = rgba(col.gold, a); ctx.stroke(box[h]);
-        ctx.strokeStyle = rgba(col.red, a * 0.8); ctx.stroke(tape[h]);
+        const r = 6 + p.z * 13;
+        const a = (0.08 + p.z * 0.16) + Math.min(1, p.glow) * 0.4;
+        const squash = 0.35 + 0.65 * Math.abs(Math.cos(p.tumble));
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.spin);
+        ctx.scale(1, squash);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+        g.addColorStop(0, rgba(col.red, a * 0.35));
+        g.addColorStop(0.5, rgba(col.red, a * 0.55));
+        g.addColorStop(0.78, rgba(col.red, a));
+        g.addColorStop(1, rgba(col.red, 0));
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       // The hub: a faint ring that beats with the heart.
@@ -276,17 +275,6 @@ export default function HelixField() {
       last = t;
       const d = target - pos;
       pos += Math.abs(d) < 0.3 ? d : d * 0.22;
-      // Idle spin, plus whatever a drag or its momentum adds.
-      turn += 0.004;
-      if (!drag) { turn += spinV; spinV *= 0.9; if (Math.abs(spinV) < 0.0004) spinV = 0; }
-      // The DNA keeps its distance: if the cursor comes within reach, it slides to whichever side
-      // of the cursor is nearer its home in the middle, and drifts back once the cursor has gone.
-      let want = 0;
-      if (mouse.in && !drag) {
-        const reach = Math.min(W * 0.2, 250) + SHY, off = mouse.x - W / 2, room = W * 0.34;
-        if (Math.abs(off) < reach + room) want = off >= 0 ? Math.max(-room, Math.min(0, off - reach)) : Math.min(room, Math.max(0, off + reach));
-      }
-      dodge += (want - dodge) * (want ? 0.1 : 0.04);
       const beat = step(t);
       draw(t, beat);
     };
@@ -302,31 +290,23 @@ export default function HelixField() {
       if (e.pointerType === "touch") return;
       mouse.x = e.clientX; mouse.y = e.clientY;
       mouse.on = openSpace(e.target as Element);
-      mouse.in = true;
-      if (drag) {
-        const dx = e.clientX - drag.x;
-        drag.moved += Math.abs(dx) + Math.abs(e.clientY - drag.y);
-        drag.x = e.clientX; drag.y = e.clientY;
-        turn += dx * 0.009; spinV = dx * 0.009;
-      }
+      if (press) { press.moved += Math.abs(e.clientX - press.x) + Math.abs(e.clientY - press.y); press.x = e.clientX; press.y = e.clientY; }
     };
     const onDown = (e: PointerEvent) => {
       if (e.button !== 0 || !openSpace(e.target as Element)) return;
-      drag = { x: e.clientX, y: e.clientY, moved: 0 };
-      if (e.pointerType !== "touch") document.documentElement.classList.add("helix-turning");
+      press = { x: e.clientX, y: e.clientY, moved: 0 };
     };
     const onUp = (e: PointerEvent) => {
-      if (!drag) return;
-      const click = drag.moved < 6;
-      drag = null;
-      document.documentElement.classList.remove("helix-turning");
+      if (!press) return;
+      const click = press.moved < 6;
+      press = null;
       if (!click || reduced || e.type === "pointercancel") return;
       const now = performance.now();
       waves.push({ x: e.clientX, y: e.clientY, born: now });
       depots.push({ x: e.clientX, y: e.clientY, born: now, hits: [] });
       if (depots.length > MAX_DEPOTS) depots.shift();
     };
-    const onLeave = () => { mouse.on = false; mouse.in = false; };
+    const onLeave = () => { mouse.on = false; };
     const onResize = () => { resize(); if (reduced) still(); };
     const onVis = () => (document.hidden ? stop() : start());
     const mood = new MutationObserver(() => { readColours(); if (reduced) still(); });
@@ -353,7 +333,6 @@ export default function HelixField() {
       window.removeEventListener("pointercancel", onUp);
       document.documentElement.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("visibilitychange", onVis);
-      document.documentElement.classList.remove("helix-turning");
     };
   }, []);
 

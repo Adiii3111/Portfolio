@@ -320,8 +320,6 @@ html[data-intro="done"] .intro { display: none; }
     radial-gradient(120% 80% at 50% 0%, transparent 40%, color-mix(in srgb, #000 28%, transparent) 100%),
     linear-gradient(180deg, var(--bg-top, var(--bg)), var(--bg)); }
 .lanefield-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* The DNA's reading: the skill carried by the base pair under the cursor (HelixField.tsx). */
-html.helix-turning, html.helix-turning * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
 .lanefield-readout { position: absolute; left: 0; top: 0; padding: 3px 7px; border-left: 2px solid var(--accent); background: color-mix(in srgb, var(--bg) 85%, transparent); font: 600 10px/1.4 var(--mono); letter-spacing: .08em; color: var(--fg-soft); white-space: nowrap; opacity: 0; transition: opacity .25s; will-change: transform; }
 
 /* About portrait card */
