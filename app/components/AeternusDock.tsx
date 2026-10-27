@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import RoleMatch from "./RoleMatch";
 import AeternusAsk from "./AeternusAsk";
+import InfinityMark from "./InfinityMark";
 import "./aeternus-dock.css";
 
 /*
@@ -22,6 +23,7 @@ const LAUNCH_MS = 4300;   // matches the ae-ls-* animations in aeternus-dock.css
 export default function AeternusDock() {
   const [phase, setPhase] = useState<Phase>("closed");
   const [tab, setTab] = useState<Tab>("ask");
+  const [hover, setHover] = useState(false);
   const open = phase === "open";
   const launcher = useRef<HTMLButtonElement>(null);
   function launch() {
@@ -71,9 +73,9 @@ export default function AeternusDock() {
 
   return (
     <>
-      <button ref={launcher} className={`ae-launch ${phase !== "closed" ? "is-open" : ""}`} onClick={() => (phase === "closed" ? launch() : close())} aria-expanded={open} aria-controls="aeternus" aria-label="Open AETERNUS — ask anything about Aditya" title="AETERNUS">
+      <button ref={launcher} className={`ae-launch ${phase !== "closed" ? "is-open" : ""}`} onClick={() => (phase === "closed" ? launch() : close())} aria-expanded={open} aria-controls="aeternus" aria-label="Open AETERNUS — ask anything about Aditya" title="AETERNUS" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         <span className="ae-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d={INF} /><path className="ae-trace" pathLength={1} d={INF} /></svg>
+          <InfinityMark size={34} speed={hover ? 3 : 1} />
         </span>
       </button>
 

@@ -8,10 +8,12 @@ import { useEffect, useRef } from "react";
  * white cell with its lobed nucleus, and tiny platelets, all a little out of focus. The
  * flow surges on a lub-dub heartbeat.
  *
- * The DNA is the page's spine: a slim double helix down the right edge, threaded through
- * the chapter dots so they sit on it like base pairs. The stretch you've already scrolled
- * through is lit in light, bright colours; the rest waits, faint. It fades in when the page
- * opens and turns as you scroll.
+ * The DNA is the page's spine, twice over: one slim double helix comes down the right edge
+ * from the top, threaded through the chapter dots so they sit on it like base pairs, and a
+ * second rises up the left edge from the bottom. As you scroll, each lights up from its own
+ * end (top-down on the right, bottom-up on the left) in the mood's colours, so the two fill
+ * towards each other as you read; the rest waits, faint. They fade in when the page opens
+ * and turn as you scroll.
  *
  * It's there to be played with, quietly:
  *  - the cursor is a hub: cells near it are pulled into a swirl and follow you around;
@@ -153,24 +155,27 @@ export default function HelixField() {
       return Math.min(1, age / 300) * Math.min(1, (DEPOT_LIFE - age) / 1000);
     };
 
-    // The DNA spine: down the chapter rail on the right. Above the reading line (how far down
-    // the page you are) it's lit, its colour blending between two light tones; below, faint.
+    // The DNA spines: one down the chapter rail on the right, lit from the top down to the
+    // reading line (how far down the page you are); one up the left edge, lit from the bottom up
+    // by the same amount. The lit stretch blends between the mood's two DNA colours.
     const railX = () => {
       const dot = document.querySelector(".chapter-rail i")?.getBoundingClientRect();
       return dot && dot.width ? dot.left + dot.width / 2 : W - 16;
     };
     let spineX = 0;
-    const drawHelix = (now: number, beat: number) => {
+    const drawSpine = (now: number, beat: number, cx: number, fromBottom: boolean) => {
       const shown = born ? Math.min(1, (now - born) / FADE_IN) : 0;
       if (shown <= 0) return;
       const R = W < 720 ? 8 : SPINE_R;
-      const travel = pos * 0.5;
-      const spin = pos * 0.004;
+      const travel = (fromBottom ? -pos : pos) * 0.5;
+      const spin = pos * 0.004 + (fromBottom ? Math.PI : 0);
       const max = Math.max(1, document.documentElement.scrollHeight - H);
-      const readY = (pos / max) * H;             // the reading line moves down the screen as you read
+      const read = (pos / max) * H;               // how much of each spine is lit
+      const readY = fromBottom ? H - read : read;
+      const isLit = (sy: number) => (fromBottom ? sy >= readY : sy <= readY) ? 1 : 0;
       const pt = (sy: number, phase: number) => {
         const th = (sy + travel) * TWIST + spin + phase;
-        return { x: spineX + Math.cos(th) * R, y: sy, z: Math.sin(th) };
+        return { x: cx + Math.cos(th) * R, y: sy, z: Math.sin(th) };
       };
       const lift = beat * 0.06;
       const tint = (a: number) => {
@@ -186,14 +191,14 @@ export default function HelixField() {
         for (let sy = first; sy < H + RUNG; sy += RUNG) {
           const a = pt(sy, 0), b = pt(sy, GROOVE);
           if (((a.z + b.z) / 2 >= 0) !== front) continue;
-          const lit = sy <= readY ? 1 : 0;
+          const lit = isLit(sy);
           rung[lit].moveTo(a.x, a.y); rung[lit].lineTo(b.x, b.y);
         }
         for (const phase of [0, GROOVE]) {
           let prev = pt(-STEP, phase);
           for (let sy = 0; sy <= H + STEP; sy += STEP) {
             const q = pt(sy, phase);
-            if (((q.z + prev.z) / 2 >= 0) === front) { const lit = sy <= readY ? 1 : 0; bb[lit].moveTo(prev.x, prev.y); bb[lit].lineTo(q.x, q.y); }
+            if (((q.z + prev.z) / 2 >= 0) === front) { const lit = isLit(sy); bb[lit].moveTo(prev.x, prev.y); bb[lit].lineTo(q.x, q.y); }
             prev = q;
           }
         }
@@ -206,17 +211,19 @@ export default function HelixField() {
         ctx.strokeStyle = tint((0.75 + lift) * d); ctx.stroke(bb[1]);
       }
       // The reading line itself: a soft glow where lit meets faint.
-      const glow = ctx.createRadialGradient(spineX, readY, 0, spineX, readY, R * 2.4);
+      const glow = ctx.createRadialGradient(cx, readY, 0, cx, readY, R * 2.4);
       glow.addColorStop(0, rgba(col.dnaB, 0.5 + lift)); glow.addColorStop(1, rgba(col.dnaB, 0));
       ctx.fillStyle = glow;
-      ctx.fillRect(spineX - R * 2.4, readY - R * 2.4, R * 4.8, R * 4.8);
+      ctx.fillRect(cx - R * 2.4, readY - R * 2.4, R * 4.8, R * 4.8);
       ctx.globalAlpha = 1;
     };
 
     const draw = (now: number, beat: number) => {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      drawHelix(now, beat);
+      drawSpine(now, beat, spineX, false);
+      // The left spine sits in the page margin, so it only shows where there is margin to spare.
+      if (W >= 720) drawSpine(now, beat, Math.max(22, Math.min(46, (W - 1240) / 4 + 12)), true);
 
       // Blood cells, smaller and fainter the further away they are.
       //  red: a biconcave disc, brighter at the rim than in the dimple, face-on or edge-on as it tumbles;

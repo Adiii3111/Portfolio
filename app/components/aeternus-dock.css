@@ -8,21 +8,9 @@
 .ae-launch:hover { transform: translateY(-3px); background: var(--accent); }
 .ae-launch.is-open { opacity: 0; pointer-events: none; }
 .ae-mark { display: grid; place-items: center; width: 36px; height: 36px; background: color-mix(in srgb, var(--accent) 14%, transparent); clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-/* The mark is an infinity (AETERNUS: timeless); a point of light runs round it forever. */
-.ae-mark svg { width: 26px; height: 26px; fill: none; stroke: color-mix(in srgb, var(--accent) 55%, transparent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
-.ae-mark .ae-trace { stroke: var(--accent); stroke-width: 2.2; stroke-dasharray: .16 .84; animation: ae-trace 3.2s linear infinite; filter: drop-shadow(0 0 2px var(--accent)); }
-.ae-launch:hover .ae-trace { animation-duration: 1.2s; }
-.ae-mark { width: 44px; height: 44px; perspective: 120px; }
-/* The mark floats: it turns all the way round, tipping towards and away from you and bobbing as it goes. */
-.ae-mark svg { width: 32px; height: 32px; animation: ae-float 9s linear infinite; }
-.ae-launch:hover .ae-mark svg { animation-duration: 3s; }
-@keyframes ae-float {
-  0% { transform: translateY(0) rotateZ(0deg) rotateX(0deg); }
-  25% { transform: translateY(-2px) rotateZ(90deg) rotateX(28deg); }
-  50% { transform: translateY(0) rotateZ(180deg) rotateX(0deg); }
-  75% { transform: translateY(2px) rotateZ(270deg) rotateX(-28deg); }
-  100% { transform: translateY(0) rotateZ(360deg) rotateX(0deg); }
-}
+/* The mark: a 3D infinity tumbling in its plate (InfinityMark.tsx), drawn in the accent colour. */
+.ae-inf { display: block; color: var(--accent); }
+.ae-mark { width: 44px; height: 44px; }
 
 /* Launch: the mark flies from its corner to the centre and grows, the name opens out letter
    by letter beneath it, the tagline follows, and the whole thing hands over to the panel. */
