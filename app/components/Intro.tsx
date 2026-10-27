@@ -9,16 +9,17 @@ export function finishIntro() {
 
 // Timeline (ms).
 const GROW = [100, 1000];     // the helix grows out from the middle of the screen
-const UNZIP = [2150, 3100];   // it unzips and the two strands sweep off to the edges
-const END = 3850;
+const UNZIP = [1300, 2150];   // it unzips and the two strands sweep off to the edges
+const END = 2650;
 
 const smooth = (t: number, a: number, b: number) => { const x = Math.max(0, Math.min(1, (t - a) / (b - a))); return x * x * (3 - 2 * x); };
 
 /**
- * A ~3.75s opening sequence: a DNA double helix grows out from the middle of a dark screen,
- * base pairs popping in as it turns, and Aditya's name comes up across it. Then it unzips:
- * one strand sweeps off to the top-right edge and the other to the bottom-left, where the
- * page's two DNA spines live, and the screen opens onto the page.
+ * A ~2.6s opening sequence: a DNA double helix grows out from the middle of a dark screen,
+ * base pairs popping in as it turns. Then it unzips, and as it splits Aditya's name pops up
+ * in the gap; the name holds for a moment while one strand sweeps off to the top-right edge
+ * and the other to the bottom-left, where the page's two DNA spines live, and then the
+ * screen opens onto the page.
  *
  * It never blocks the page: it fades out on its own (via CSS even without JavaScript), and
  * any click, key, scroll, or the Skip button dismisses it immediately. Returning visitors
@@ -29,6 +30,8 @@ export default function Intro() {
 
   useEffect(() => {
     if (document.documentElement.dataset.intro === "done") return;
+    // The whole sequence (canvas and CSS alike) starts from here, when the DNA can first be
+    // drawn, so a slow page start never skips the helix growing and splitting.
     const t = setTimeout(finishIntro, END + 100);
     const skip = () => finishIntro();
     window.addEventListener("wheel", skip, { passive: true, once: true });
@@ -40,10 +43,10 @@ export default function Intro() {
     if (cv && ctx) {
       const W = (cv.width = window.innerWidth), H = (cv.height = window.innerHeight);
       const R = Math.min(W, H) * 0.11, RUNG = 22, TWIST = (Math.PI * 2) / (RUNG * 10), GROOVE = 2.35;
-      // Timed from page load (rAF time counts from navigation), the same clock as the CSS that
-      // brings the name in and fades the intro out, so a slow start can't put them out of step.
+      let t0 = 0;
       const frame = (now: number) => {
-        const t = now - 120;
+        if (!t0) { t0 = now; cv.parentElement?.classList.add("is-live"); }
+        const t = now - t0;
         ctx.clearRect(0, 0, W, H);
         const reach = smooth(t, GROW[0], GROW[1]) * (H / 2 + 60);
         const u = smooth(t, UNZIP[0], UNZIP[1]);
