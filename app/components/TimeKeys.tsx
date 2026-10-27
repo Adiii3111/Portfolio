@@ -59,7 +59,6 @@ export default function TimeKeys() {
     >
       <svg key={now.id} viewBox="0 0 24 24" aria-hidden="true">{now.icon}</svg>
       <span>{now.label}</span>
-      <i className="tk-led" aria-hidden="true" />
     </button>
   );
 }
