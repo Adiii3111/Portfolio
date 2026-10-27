@@ -14,14 +14,14 @@
 
 /* Launch: the mark flies from its corner to the centre and grows, the name opens out letter
    by letter beneath it, the tagline follows, and the whole thing hands over to the panel. */
-.ae-ls { position: fixed; inset: 0; z-index: 147; display: grid; place-content: center; justify-items: center; gap: 18px; animation: ae-ls-out .3s ease 2.1s forwards; }
-.ae-ls svg { width: min(240px, 44vw); height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; animation: ae-ls-fly .6s cubic-bezier(.2, .8, .2, 1) both; }
+.ae-ls { position: fixed; inset: 0; z-index: 147; display: grid; place-content: center; justify-items: center; gap: 18px; animation: ae-ls-out .25s ease 1.3s forwards; }
+.ae-ls svg { width: min(240px, 44vw); height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; animation: ae-ls-fly .45s cubic-bezier(.2, .8, .2, 1) both; }
 .ae-ls-base { stroke: color-mix(in srgb, var(--accent) 30%, transparent); stroke-width: .8; }
-.ae-ls-draw { stroke: var(--accent); stroke-width: 1.1; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 3px var(--accent)); animation: ae-ls-draw .9s ease .25s forwards; }
+.ae-ls-draw { stroke: var(--accent); stroke-width: 1.1; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 3px var(--accent)); animation: ae-ls-draw .6s ease .15s forwards; }
 .ae-ls-run { stroke: #fff; stroke-width: 1.4; stroke-dasharray: .1 .9; filter: drop-shadow(0 0 4px var(--accent)); animation: ae-trace 1s linear infinite; }
 .ae-ls b { display: flex; font: 600 clamp(26px, 4vw, 44px)/1 var(--serif); letter-spacing: .42em; margin-right: -.42em; color: var(--accent); }
-.ae-ls b span { opacity: 0; animation: ae-ls-letter .45s var(--ease) both; }
-.ae-ls i { font: 500 12px/1 var(--sans); font-style: normal; letter-spacing: .32em; text-transform: uppercase; color: var(--muted); opacity: 0; animation: ae-fade .4s ease .8s forwards; }
+.ae-ls b span { opacity: 0; animation: ae-ls-letter .35s var(--ease) both; }
+.ae-ls i { font: 500 12px/1 var(--sans); font-style: normal; letter-spacing: .32em; text-transform: uppercase; color: var(--muted); opacity: 0; animation: ae-fade .3s ease .55s forwards; }
 @keyframes ae-ls-fly { from { opacity: 0; transform: translate(calc(50vw - 60px), calc(50vh - 60px)) scale(.18); } to { opacity: 1; transform: none; } }
 @keyframes ae-ls-draw { to { stroke-dashoffset: 0; } }
 @keyframes ae-ls-letter { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }

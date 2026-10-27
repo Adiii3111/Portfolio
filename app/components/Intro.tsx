@@ -1,34 +1,103 @@
 "use client";
 
-import { useEffect } from "react";
-import WorldMap, { PLANE_PATH, WORLD, placePercent } from "./WorldMap";
-import { distanceKm, formatCoord, greatCircle, places, routePath } from "../lib/geo";
-
-const KM = Math.round(distanceKm(places.bengaluru, places.boston) / 10) * 10;
-const kmLabel = KM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-const ROUTE = routePath(greatCircle(places.bengaluru, places.boston), WORLD, 1400);
+import { useEffect, useRef } from "react";
 
 export function finishIntro() {
   document.documentElement.dataset.intro = "done";
   try { sessionStorage.setItem("aks-intro", "1"); } catch {}
 }
 
+// Timeline (ms).
+const GROW = [100, 1000];     // the helix grows out from the middle of the screen
+const UNZIP = [1650, 2600];   // it unzips and the two strands sweep off to the edges
+const END = 3300;
+
+const smooth = (t: number, a: number, b: number) => { const x = Math.max(0, Math.min(1, (t - a) / (b - a))); return x * x * (3 - 2 * x); };
+
 /**
- * A ~2.8s opening sequence. It never blocks the page: it fades out on its own
- * (via CSS even without JavaScript), and any click, key, scroll, or the Skip
- * button dismisses it immediately. Returning visitors and reduced-motion users
- * never see it (see the inline script in layout.tsx).
+ * A ~3.2s opening sequence: a DNA double helix grows out from the middle of a dark screen,
+ * base pairs popping in as it turns, and Aditya's name comes up across it. Then it unzips:
+ * one strand sweeps off to the top-right edge and the other to the bottom-left, where the
+ * page's two DNA spines live, and the screen opens onto the page.
+ *
+ * It never blocks the page: it fades out on its own (via CSS even without JavaScript), and
+ * any click, key, scroll, or the Skip button dismisses it immediately. Returning visitors
+ * and reduced-motion users never see it (see the inline script in layout.tsx).
  */
 export default function Intro() {
+  const ref = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
     if (document.documentElement.dataset.intro === "done") return;
-    const t = setTimeout(finishIntro, 3300);
+    const t = setTimeout(finishIntro, END + 100);
     const skip = () => finishIntro();
     window.addEventListener("wheel", skip, { passive: true, once: true });
     window.addEventListener("touchmove", skip, { passive: true, once: true });
     window.addEventListener("keydown", skip, { once: true });
+
+    const cv = ref.current, ctx = cv?.getContext("2d");
+    let raf = 0;
+    if (cv && ctx) {
+      const W = (cv.width = window.innerWidth), H = (cv.height = window.innerHeight);
+      const R = Math.min(W, H) * 0.11, RUNG = 22, TWIST = (Math.PI * 2) / (RUNG * 10), GROOVE = 2.35;
+      // Timed from page load (rAF time counts from navigation), the same clock as the CSS that
+      // brings the name in and fades the intro out, so a slow start can't put them out of step.
+      const frame = (now: number) => {
+        const t = now - 120;
+        ctx.clearRect(0, 0, W, H);
+        const reach = smooth(t, GROW[0], GROW[1]) * (H / 2 + 60);
+        const u = smooth(t, UNZIP[0], UNZIP[1]);
+        const spin = t * 0.0018;
+        // Each strand drifts away from the middle as it unzips: one to the top-right, one to the bottom-left.
+        const strand = (sy: number, phase: number, side: number) => {
+          const th = sy * TWIST + spin + phase;
+          const r = R * (1 - 0.55 * u);
+          return {
+            x: W / 2 + Math.cos(th) * r + side * u * (W / 2 - 30),
+            y: sy - side * u * H * 0.3,
+            z: Math.sin(th),
+          };
+        };
+        const y0 = H / 2 - reach, y1 = H / 2 + reach;
+        ctx.lineCap = "round";
+
+        // Base pairs: popping in as the helix reaches them, then splitting into halves that
+        // go with their strands and fade as it unzips.
+        for (let sy = Math.ceil(y0 / RUNG) * RUNG; sy < y1; sy += RUNG) {
+          const pop = Math.min(1, (reach - Math.abs(sy - H / 2)) / 50);
+          if (pop <= 0) continue;
+          const a = strand(sy, 0, 1), b = strand(sy, GROOVE, -1);
+          const near = (a.z + b.z) / 2 >= 0;
+          const k = Math.round(sy / RUNG);
+          const gc = ((k * 7919) % 5) < 2;
+          const half = 0.5 * pop * (1 - u);
+          ctx.lineWidth = near ? 2 : 1.2;
+          ctx.strokeStyle = `rgba(${gc ? "232,97,91" : "226,205,164"},${((near ? 0.7 : 0.3) * (1 - u)).toFixed(3)})`;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y); ctx.lineTo(a.x + (b.x - a.x) * half, a.y + (b.y - a.y) * half);
+          ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + (a.x - b.x) * half, b.y + (a.y - b.y) * half);
+          ctx.stroke();
+        }
+        // The two backbones, near segments heavier than far ones.
+        for (const [phase, side, rgb] of [[0, 1, "226,205,164"], [GROOVE, -1, "158,222,255"]] as const) {
+          let prev = strand(y0, phase, side);
+          for (let sy = y0 + 5; sy <= y1; sy += 5) {
+            const q = strand(sy, phase, side);
+            const near = (q.z + prev.z) / 2;
+            ctx.lineWidth = 1.4 + (near + 1) * 1.4;
+            ctx.strokeStyle = `rgba(${rgb},${(0.35 + (near + 1) * 0.3).toFixed(3)})`;
+            ctx.beginPath(); ctx.moveTo(prev.x, prev.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+            prev = q;
+          }
+        }
+        if (t < END) raf = requestAnimationFrame(frame);
+      };
+      raf = requestAnimationFrame(frame);
+    }
+
     return () => {
       clearTimeout(t);
+      cancelAnimationFrame(raf);
       window.removeEventListener("wheel", skip);
       window.removeEventListener("touchmove", skip);
       window.removeEventListener("keydown", skip);
@@ -36,26 +105,12 @@ export default function Intro() {
   }, []);
 
   return (
-    <div className="intro" onClick={finishIntro} aria-label="Opening sequence: Bengaluru, India to Boston, Massachusetts">
-      <div className="intro-map">
-        <WorldMap className="intro-svg" routes={[{ from: "bengaluru", to: "boston" }]} markers={[{ at: "bengaluru", className: "m-origin" }, { at: "boston", className: "m-dest" }]}>
-          {/* Flies the route in step with the line drawing (same timing and easing as .intro .map-route). */}
-          <g className="intro-plane" opacity="0">
-            <path d={PLANE_PATH} transform="scale(1.6)" />
-            <set attributeName="opacity" to="1" begin="0.55s" />
-            <animateMotion dur="1.45s" begin="0.55s" fill="freeze" rotate="auto" path={ROUTE} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".65 0 .35 1" />
-          </g>
-        </WorldMap>
-        <div className="intro-label intro-origin" style={placePercent("bengaluru")}>
-          <strong>Bengaluru, India</strong>
-          <span>{formatCoord(places.bengaluru)}</span>
-        </div>
-        <div className="intro-label intro-dest" style={placePercent("boston")}>
-          <strong>Boston, Massachusetts</strong>
-          <span>{formatCoord(places.boston)}</span>
-        </div>
+    <div className="intro" onClick={finishIntro} aria-label="Opening sequence: Aditya Kadlabal Sripad">
+      <canvas ref={ref} className="intro-dna" aria-hidden="true" />
+      <div className="intro-id">
+        <h2>Aditya Kadlabal Sripad</h2>
+        <p>Healthcare · Supply Chain · Analytics</p>
       </div>
-      <p className="intro-caption">≈ {kmLabel} km by great circle · one continuing journey</p>
       <button className="intro-skip" onClick={(e) => { e.stopPropagation(); finishIntro(); }}>Skip intro →</button>
     </div>
   );
