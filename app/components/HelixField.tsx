@@ -6,9 +6,12 @@ import { useEffect, useRef } from "react";
  * The site-wide backdrop: circulation. Blood drifts across the whole screen on slow,
  * branching currents, as if seen under a microscope: red cells tumbling as they go, the odd
  * white cell with its lobed nucleus, and tiny platelets, all a little out of focus. The
- * flow surges on a lub-dub heartbeat. A straight DNA double
- * helix in light, bright colours runs down the middle; it fades in when the page opens and
- * turns as you scroll.
+ * flow surges on a lub-dub heartbeat.
+ *
+ * The DNA is the page's spine: a slim double helix down the right edge, threaded through
+ * the chapter dots so they sit on it like base pairs. The stretch you've already scrolled
+ * through is lit in light, bright colours; the rest waits, faint. It fades in when the page
+ * opens and turns as you scroll.
  *
  * It's there to be played with, quietly:
  *  - the cursor is a hub: cells near it are pulled into a swirl and follow you around;
@@ -27,11 +30,11 @@ const readRGB = (name: string, fallback: string) =>
 const rgba = (c: number[], a: number) => `rgba(${c[0]},${c[1]},${c[2]},${Math.max(0, Math.min(1, a)).toFixed(3)})`;
 
 // Helix geometry.
-const STEP = 8;          // px between backbone samples
-const RUNG = 46;         // px between base pairs (≈ 10.5 pairs per turn)
+const STEP = 4;          // px between backbone samples
+const RUNG = 12;         // px between base pairs (≈ 10.5 pairs per turn)
 const TWIST = (Math.PI * 2) / (RUNG * 10.5);
+const SPINE_R = 15;      // helix radius (px) on the chapter rail
 const GROOVE = 2.35;     // phase gap between the two backbones: major vs minor groove
-const LEVELS = 4;        // depth bands, batched
 const FADE_IN = 1800;    // ms for the DNA to fade in on load
 
 // Circulation.
@@ -150,22 +153,26 @@ export default function HelixField() {
       return Math.min(1, age / 300) * Math.min(1, (DEPOT_LIFE - age) / 1000);
     };
 
-    // The DNA: straight down the middle, its colour blending from one light tone to the other
-    // and back along its length.
+    // The DNA spine: down the chapter rail on the right. Above the reading line (how far down
+    // the page you are) it's lit, its colour blending between two light tones; below, faint.
+    const railX = () => {
+      const dot = document.querySelector(".chapter-rail i")?.getBoundingClientRect();
+      return dot && dot.width ? dot.left + dot.width / 2 : W - 16;
+    };
+    let spineX = 0;
     const drawHelix = (now: number, beat: number) => {
-      const R = Math.min(W * 0.2, 250);
-      const travel = pos * 0.55;                  // we move down the strand slower than the page
-      const spin = pos * 0.0032;                  // scrolling turns it
-      const cx = W / 2;
-      const y0 = -RUNG * 2, y1 = H + RUNG * 2;
-      const pt = (sy: number, phase: number) => {
-        const th = (sy + travel) * TWIST + spin + phase;
-        return { x: cx + Math.cos(th) * R, y: sy, z: Math.sin(th) };
-      };
-      const level = (z: number) => Math.min(LEVELS - 1, Math.floor((0.5 + z * 0.5) * LEVELS));
-      const lift = beat * 0.05;
       const shown = born ? Math.min(1, (now - born) / FADE_IN) : 0;
       if (shown <= 0) return;
+      const R = W < 720 ? 8 : SPINE_R;
+      const travel = pos * 0.5;
+      const spin = pos * 0.004;
+      const max = Math.max(1, document.documentElement.scrollHeight - H);
+      const readY = (pos / max) * H;             // the reading line moves down the screen as you read
+      const pt = (sy: number, phase: number) => {
+        const th = (sy + travel) * TWIST + spin + phase;
+        return { x: spineX + Math.cos(th) * R, y: sy, z: Math.sin(th) };
+      };
+      const lift = beat * 0.06;
       const tint = (a: number) => {
         const g = ctx.createLinearGradient(0, 0, 0, H);
         g.addColorStop(0, rgba(col.dnaA, a)); g.addColorStop(0.5, rgba(col.dnaB, a)); g.addColorStop(1, rgba(col.dnaA, a));
@@ -173,39 +180,36 @@ export default function HelixField() {
       };
       ctx.globalAlpha = shown * shown * (3 - 2 * shown);
       for (const front of [false, true]) {
-        const bb = Array.from({ length: LEVELS }, () => new Path2D());
-        const rungA = Array.from({ length: LEVELS }, () => new Path2D());
-        const rungB = Array.from({ length: LEVELS }, () => new Path2D());
-        const first = Math.ceil((y0 + travel) / RUNG) * RUNG - travel;
-        for (let sy = first; sy < y1; sy += RUNG) {
+        // [faint, lit] paths for backbones and base pairs.
+        const bb = [new Path2D(), new Path2D()], rung = [new Path2D(), new Path2D()];
+        const first = Math.ceil((-RUNG + travel) / RUNG) * RUNG - travel;
+        for (let sy = first; sy < H + RUNG; sy += RUNG) {
           const a = pt(sy, 0), b = pt(sy, GROOVE);
-          const z = (a.z + b.z) / 2;
-          if ((z >= 0) !== front) continue;
-          const k = Math.round((sy + travel) / RUNG);
-          const gc = ((k * 7919) % 5) < 2;
-          const lv = level(z);
-          const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-          rungA[lv].moveTo(a.x, a.y); rungA[lv].lineTo(mx, my);
-          (gc ? rungB : rungA)[lv].moveTo(mx, my); (gc ? rungB : rungA)[lv].lineTo(b.x, b.y);
+          if (((a.z + b.z) / 2 >= 0) !== front) continue;
+          const lit = sy <= readY ? 1 : 0;
+          rung[lit].moveTo(a.x, a.y); rung[lit].lineTo(b.x, b.y);
         }
         for (const phase of [0, GROOVE]) {
-          let prev = pt(y0, phase);
-          for (let sy = y0 + STEP; sy <= y1; sy += STEP) {
+          let prev = pt(-STEP, phase);
+          for (let sy = 0; sy <= H + STEP; sy += STEP) {
             const q = pt(sy, phase);
-            const z = (q.z + prev.z) / 2;
-            if ((z >= 0) === front) { bb[level(z)].moveTo(prev.x, prev.y); bb[level(z)].lineTo(q.x, q.y); }
+            if (((q.z + prev.z) / 2 >= 0) === front) { const lit = sy <= readY ? 1 : 0; bb[lit].moveTo(prev.x, prev.y); bb[lit].lineTo(q.x, q.y); }
             prev = q;
           }
         }
-        for (let lv = 0; lv < LEVELS; lv++) {
-          const d = (lv + 0.5) / LEVELS;
-          ctx.lineWidth = 0.9 + d * 1.4;
-          ctx.strokeStyle = tint(0.08 + d * 0.2 + lift); ctx.stroke(rungA[lv]);
-          ctx.strokeStyle = rgba(col.dnaB, 0.08 + d * 0.22 + lift); ctx.stroke(rungB[lv]);
-          ctx.lineWidth = 1 + d * 2.8;
-          ctx.strokeStyle = tint(0.12 + d * 0.4 + lift); ctx.stroke(bb[lv]);
-        }
+        const d = front ? 1 : 0.45;
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = rgba(col.dnaA, 0.06 * d); ctx.stroke(rung[0]);
+        ctx.strokeStyle = tint((0.35 + lift) * d); ctx.stroke(rung[1]);
+        ctx.lineWidth = front ? 1.8 : 1.2;
+        ctx.strokeStyle = rgba(col.dnaA, 0.1 * d); ctx.stroke(bb[0]);
+        ctx.strokeStyle = tint((0.75 + lift) * d); ctx.stroke(bb[1]);
       }
+      // The reading line itself: a soft glow where lit meets faint.
+      const glow = ctx.createRadialGradient(spineX, readY, 0, spineX, readY, R * 2.4);
+      glow.addColorStop(0, rgba(col.dnaB, 0.5 + lift)); glow.addColorStop(1, rgba(col.dnaB, 0));
+      ctx.fillStyle = glow;
+      ctx.fillRect(spineX - R * 2.4, readY - R * 2.4, R * 4.8, R * 4.8);
       ctx.globalAlpha = 1;
     };
 
@@ -327,11 +331,12 @@ export default function HelixField() {
       if (depots.length > MAX_DEPOTS) depots.shift();
     };
     const onLeave = () => { mouse.on = false; };
-    const onResize = () => { resize(); if (reduced) still(); };
+    const onResize = () => { resize(); spineX = railX(); if (reduced) still(); };
     const onVis = () => (document.hidden ? stop() : start());
     const mood = new MutationObserver(() => { readColours(); if (reduced) still(); });
 
-    readColours(); resize();
+    readColours(); resize(); spineX = railX();
+    const settle = setTimeout(() => { spineX = railX(); }, 600);   // the rail may lay out after this runs
     born = performance.now();
     if (reduced) still(); else start();
     mood.observe(document.documentElement, { attributes: true, attributeFilter: ["data-time"] });
@@ -344,7 +349,7 @@ export default function HelixField() {
     document.documentElement.addEventListener("pointerleave", onLeave);
     document.addEventListener("visibilitychange", onVis);
     return () => {
-      stop(); mood.disconnect();
+      stop(); mood.disconnect(); clearTimeout(settle);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onMove);

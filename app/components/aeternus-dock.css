@@ -12,12 +12,21 @@
 .ae-mark svg { width: 26px; height: 26px; fill: none; stroke: color-mix(in srgb, var(--accent) 55%, transparent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
 .ae-mark .ae-trace { stroke: var(--accent); stroke-width: 2.2; stroke-dasharray: .16 .84; animation: ae-trace 3.2s linear infinite; filter: drop-shadow(0 0 2px var(--accent)); }
 .ae-launch:hover .ae-trace { animation-duration: 1.2s; }
-.ae-mark { width: 44px; height: 44px; }
-.ae-mark svg { width: 32px; height: 32px; }
+.ae-mark { width: 44px; height: 44px; perspective: 120px; }
+/* The mark floats: it turns all the way round, tipping towards and away from you and bobbing as it goes. */
+.ae-mark svg { width: 32px; height: 32px; animation: ae-float 9s linear infinite; }
+.ae-launch:hover .ae-mark svg { animation-duration: 3s; }
+@keyframes ae-float {
+  0% { transform: translateY(0) rotateZ(0deg) rotateX(0deg); }
+  25% { transform: translateY(-2px) rotateZ(90deg) rotateX(28deg); }
+  50% { transform: translateY(0) rotateZ(180deg) rotateX(0deg); }
+  75% { transform: translateY(2px) rotateZ(270deg) rotateX(-28deg); }
+  100% { transform: translateY(0) rotateZ(360deg) rotateX(0deg); }
+}
 
 /* Launch: the mark flies from its corner to the centre and grows, the name opens out letter
    by letter beneath it, the tagline follows, and the whole thing hands over to the panel. */
-.ae-ls { position: fixed; inset: 0; z-index: 147; display: grid; place-content: center; justify-items: center; gap: 18px; animation: ae-ls-out .3s ease 1.2s forwards; }
+.ae-ls { position: fixed; inset: 0; z-index: 147; display: grid; place-content: center; justify-items: center; gap: 18px; animation: ae-ls-out .3s ease 4s forwards; }
 .ae-ls svg { width: min(240px, 44vw); height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; animation: ae-ls-fly .6s cubic-bezier(.2, .8, .2, 1) both; }
 .ae-ls-base { stroke: color-mix(in srgb, var(--accent) 30%, transparent); stroke-width: .8; }
 .ae-ls-draw { stroke: var(--accent); stroke-width: 1.1; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 3px var(--accent)); animation: ae-ls-draw .9s ease .25s forwards; }

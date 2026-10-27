@@ -17,7 +17,7 @@ type Tab = "ask" | "match";
 type Phase = "closed" | "launch" | "open";
 
 const INF = "M12 12C9.6 8.4 3.5 8.4 3.5 12C3.5 15.6 9.6 15.6 12 12C14.4 8.4 20.5 8.4 20.5 12C20.5 15.6 14.4 15.6 12 12Z";
-const LAUNCH_MS = 1500;   // matches the ae-ls-* animations in aeternus-dock.css
+const LAUNCH_MS = 4300;   // matches the ae-ls-* animations in aeternus-dock.css: the name holds ~3s so it can be read
 
 export default function AeternusDock() {
   const [phase, setPhase] = useState<Phase>("closed");
@@ -79,7 +79,7 @@ export default function AeternusDock() {
 
       <div className="ae-backdrop" hidden={phase === "closed"} onClick={close} />
       {phase === "launch" && (
-        <div className="ae-ls" aria-hidden="true" onClick={close}>
+        <div className="ae-ls" aria-hidden="true" onClick={() => setPhase("open")}>
           <svg viewBox="0 0 24 24"><path className="ae-ls-base" d={INF} /><path className="ae-ls-draw" pathLength={1} d={INF} /><path className="ae-ls-run" pathLength={1} d={INF} /></svg>
           <b>{"AETERNUS".split("").map((ch, i) => <span key={i} style={{ animationDelay: `${0.55 + i * 0.05}s` }}>{ch}</span>)}</b>
           <i>Intelligence Beyond Limits</i>
