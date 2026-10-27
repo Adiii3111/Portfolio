@@ -15,7 +15,7 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Aditya Kadlabal Sripad — Engineer, Researcher, Analyst",
+  title: "Adiii · Aditya Kadlabal Sripad",
   description:
     "From Bengaluru to Boston — Aditya Kadlabal Sripad connects engineering, healthcare, supply chains, analytics, and research.",
 };
