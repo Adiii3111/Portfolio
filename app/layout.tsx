@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 // in this tab session and for anyone who prefers reduced motion.
 // Also picks the time-of-day mood (a saved choice, else the visitor's clock) so there's no flash.
 // morning + afternoon use the light tone, evening + night the dark tone.
-const introScript = `try{if(sessionStorage.getItem("aks-intro")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.dataset.intro="done"}catch(e){}var h=new Date().getHours(),t=h>=5&&h<11?"morning":h>=11&&h<17?"afternoon":h>=17&&h<20?"evening":"night",d=document.documentElement.dataset;d.time=t;d.theme=t==="morning"||t==="afternoon"?"light":"dark";`;
+const introScript = `try{if(!location.hash){history.scrollRestoration="manual";scrollTo(0,0)}}catch(e){}try{if(sessionStorage.getItem("aks-intro")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.dataset.intro="done"}catch(e){}var h=new Date().getHours(),t=h>=5&&h<11?"morning":h>=11&&h<17?"afternoon":h>=17&&h<20?"evening":"night",d=document.documentElement.dataset;d.time=t;d.theme=t==="morning"||t==="afternoon"?"light":"dark";`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

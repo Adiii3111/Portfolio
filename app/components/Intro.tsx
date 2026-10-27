@@ -113,6 +113,8 @@ export default function Intro() {
       <div className="intro-id">
         <h2>Aditya Kadlabal Sripad</h2>
       </div>
+      {/* The name waits for the split (see .intro.is-live); without JavaScript there's no split, so just show it. */}
+      <noscript><style>{".intro-id{opacity:1}"}</style></noscript>
       <button className="intro-skip" onClick={(e) => { e.stopPropagation(); finishIntro(); }}>Skip intro →</button>
     </div>
   );
