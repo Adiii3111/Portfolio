@@ -3,14 +3,16 @@
 import { useEffect, useRef } from "react";
 
 /*
- * The site-wide backdrop: circulation. Red cells and gold supply crates stream across the
- * whole screen along slow, branching currents — read it as blood vessels or as freight
- * lanes — and the flow surges on a lub-dub heartbeat. A DNA double helix runs down the
- * middle as the spine; it turns slowly on its own and as you scroll.
+ * The site-wide backdrop: circulation. Small medical crosses and parcels stream across the
+ * whole screen along slow, branching currents (a medical supply network), and the flow
+ * surges on a lub-dub heartbeat. A straight DNA double helix in light, bright colours runs
+ * down the middle; it fades in when the page opens and turns slowly as you scroll.
  *
  * It's there to be played with, quietly:
+ *  - the DNA won't be touched: bring the cursor near and the whole strand slides away to
+ *    one side (the part nearest the cursor leaning furthest), drifting back when you leave;
  *  - the cursor is a hub: traffic near it is pulled into a swirl and follows you around;
- *  - clicking open space drops a clinic (a small cross depot) that draws traffic in, each
+ *  - clicking open space drops a clinic (a cross in a diamond) that draws traffic in, each
  *    arrival "delivered" with a pulse, and sends a heartbeat shockwave out from the click;
  *  - dragging across open space turns the helix by hand.
  * Everything stays faint and only brightens near the cursor, so the content stays first.
@@ -30,12 +32,12 @@ const RUNG = 46;         // px between base pairs (≈ 10.5 pairs per turn)
 const TWIST = (Math.PI * 2) / (RUNG * 10.5);
 const GROOVE = 2.35;     // phase gap between the two backbones: major vs minor groove
 const LEVELS = 4;        // depth bands, batched
-const TAPERS = 4;        // fade bands towards the molecule's ends
+const SHY = 150;         // the gap (px) the DNA keeps between its strands and the cursor
+const FADE_IN = 1800;    // ms for the DNA to fade in on load
 
 // Circulation.
-const DENSITY = 1 / 6500;   // particles per px²
-const MAX_PARTS = 260;
-const TRAIL = 9;            // positions kept per particle
+const DENSITY = 1 / 8500;   // particles per px²
+const MAX_PARTS = 200;
 const SPEED = 0.85;         // px per frame at rest
 const HUB_R = 170;          // cursor hub radius
 const DEPOT_R = 230;        // how far a clinic reaches
@@ -43,7 +45,7 @@ const DEPOT_LIFE = 14000;   // ms
 const MAX_DEPOTS = 4;
 const BEAT_MS = 1500;       // one heartbeat
 
-type Part = { x: number; y: number; vx: number; vy: number; cell: boolean; trail: Float32Array; n: number; glow: number };
+type Part = { x: number; y: number; vx: number; vy: number; cross: boolean; glow: number };
 type Depot = { x: number; y: number; born: number; hits: number[] };
 type Wave = { x: number; y: number; born: number };
 
@@ -68,21 +70,19 @@ export default function HelixField() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let W = 0, H = 0, raf = 0, last = 0;
     let target = window.scrollY, pos = target, lastScroll = target;
-    let turn = 0, spinV = 0;
+    let turn = 0, spinV = 0, dodge = 0, born = 0;   // dodge: how far (px) the DNA has slid away from the cursor
     let drag: { x: number; y: number; moved: number } | null = null;
     let parts: Part[] = [];
     const depots: Depot[] = [];
     const waves: Wave[] = [];
-    const mouse = { x: -1, y: -1, on: false };
-    let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91] };
-    const readColours = () => { col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91") }; };
+    const mouse = { x: -1, y: -1, on: false, in: false };   // on: over open space; in: anywhere in the window
+    let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91], dnaA: [158, 231, 255], dnaB: [255, 179, 199] };
+    const readColours = () => { col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199") }; };
 
     const spawn = (edge: boolean): Part => {
       let x = Math.random() * W, y = Math.random() * H;
       if (edge) { if (Math.random() < 0.5) x = Math.random() < 0.5 ? -4 : W + 4; else y = Math.random() < 0.5 ? -4 : H + 4; }
-      const trail = new Float32Array(TRAIL * 2);
-      for (let i = 0; i < TRAIL; i++) { trail[i * 2] = x; trail[i * 2 + 1] = y; }
-      return { x, y, vx: 0, vy: 0, cell: Math.random() < 0.68, trail, n: 0, glow: 0 };
+      return { x, y, vx: 0, vy: 0, cross: Math.random() < 0.55, glow: 0 };
     };
 
     const resize = () => {
@@ -104,7 +104,6 @@ export default function HelixField() {
       for (let i = 0; i < parts.length; i++) {
         const p = parts[i];
         p.y -= dy;
-        for (let k = 0; k < TRAIL; k++) p.trail[k * 2 + 1] -= dy;
         const a = flowAngle(p.x, p.y + pos * 0.35, now);
         let tx = Math.cos(a) * SPEED * surge, ty = Math.sin(a) * SPEED * surge;
         let near = 0;
@@ -134,8 +133,6 @@ export default function HelixField() {
         p.vy += (ty - p.vy) * 0.09;
         p.x += p.vx; p.y += p.vy;
         p.glow = Math.max(p.glow * 0.94, near);
-        p.n = (p.n + 1) % TRAIL;
-        p.trail[p.n * 2] = p.x; p.trail[p.n * 2 + 1] = p.y;
         if (p.x < -30 || p.x > W + 30 || p.y < -30 || p.y > H + 30) parts[i] = spawn(true);
       }
       for (let i = depots.length - 1; i >= 0; i--) depots[i].hits = depots[i].hits.filter((h) => now - h < 700);
@@ -147,68 +144,65 @@ export default function HelixField() {
       return Math.min(1, age / 300) * Math.min(1, (DEPOT_LIFE - age) / 1000);
     };
 
-    // The DNA: a molecule of limited length drifting diagonally, bottom-left to top-right, turning
-    // on its own axis as it goes. When one leaves the far corner the next is already coming in.
+    // The DNA: straight down the middle (or wherever it has slid to, away from the cursor), its
+    // colour blending from one light tone to the other and back along its length.
     const drawHelix = (now: number, beat: number) => {
-      const R = Math.min(Math.min(W, H) * 0.17, 200);
-      const ang = Math.atan2(H, W) * 0.85;                       // a little flatter than the true diagonal
-      const ux = Math.cos(ang), uy = -Math.sin(ang);             // along the axis, towards top-right
-      const nx = -uy, ny = ux;                                   // across it
-      const margin = R + 60;
-      const span = Math.hypot(W, H) + margin * 2;                // axis length from corner to corner, off-screen both ends
-      const ox = W / 2 - ux * span / 2, oy = H / 2 - uy * span / 2;
-      const L = span * 0.62, cycle = span + L;
-      const travel = now * 0.06 + pos * 0.5;                     // drifts on its own; scrolling pushes it along
-      const spin = now * 0.0005 + turn;
-      const lift = beat * 0.05;
+      const R = Math.min(W * 0.2, 250);
+      const travel = pos * 0.55;                  // we move down the strand slower than the page
+      const spin = pos * 0.0032 + turn;           // scrolling turns it, and so does a drag
+      const cx = W / 2;
+      const y0 = -RUNG * 2, y1 = H + RUNG * 2;
+      // The part nearest the cursor leans away a little further than the rest.
+      const lean = (y: number) => dodge * (0.75 + 0.25 * Math.exp(-(((y - mouse.y) / 260) ** 2)));
+      const pt = (sy: number, phase: number) => {
+        const th = (sy + travel) * TWIST + spin + phase;
+        return { x: cx + lean(sy) + Math.cos(th) * R, y: sy, z: Math.sin(th) };
+      };
       const level = (z: number) => Math.min(LEVELS - 1, Math.floor((0.5 + z * 0.5) * LEVELS));
-
+      const lift = beat * 0.05;
+      const shown = born ? Math.min(1, (now - born) / FADE_IN) : 0;
+      if (shown <= 0) return;
+      const tint = (a: number) => {
+        const g = ctx.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, rgba(col.dnaA, a)); g.addColorStop(0.5, rgba(col.dnaB, a)); g.addColorStop(1, rgba(col.dnaA, a));
+        return g;
+      };
+      ctx.globalAlpha = shown * shown * (3 - 2 * shown);
       for (const front of [false, true]) {
-        // Paths bucketed by depth (line weight) and by taper (fading out at the molecule's ends).
-        const bb = Array.from({ length: LEVELS * TAPERS }, () => new Path2D());
-        const rungG = Array.from({ length: LEVELS * TAPERS }, () => new Path2D());
-        const rungR = Array.from({ length: LEVELS * TAPERS }, () => new Path2D());
-        for (let k = 0; k < 2; k++) {
-          const head = (((travel + (k * cycle) / 2) % cycle) + cycle) % cycle, tail = head - L;
-          const pt = (sx: number, phase: number) => {
-            const local = sx - head;
-            const th = local * TWIST + spin + phase;
-            const off = R * 0.4 * Math.sin(local * 0.0021 + k * 2) + Math.cos(th) * R;
-            return { x: ox + ux * sx + nx * off, y: oy + uy * sx + ny * off, z: Math.sin(th) };
-          };
-          const taper = (sx: number) => Math.min(TAPERS - 1, Math.floor(Math.sin(Math.PI * Math.max(0, Math.min(1, (sx - tail) / L))) ** 0.7 * TAPERS));
-          const from = Math.max(tail, -10), to = Math.min(head, span + 10);
-          if (from >= to) continue;
-          for (let j = Math.ceil((head - to) / RUNG); head - j * RUNG > from; j++) {
-            const sx = head - j * RUNG;
-            const a = pt(sx, 0), b = pt(sx, GROOVE);
-            const z = (a.z + b.z) / 2;
-            if ((z >= 0) !== front) continue;
-            const gc = ((j * 7919 + k * 13) % 5) < 2;
-            const key = level(z) * TAPERS + taper(sx);
-            const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-            rungG[key].moveTo(a.x, a.y); rungG[key].lineTo(mx, my);
-            (gc ? rungR : rungG)[key].moveTo(mx, my); (gc ? rungR : rungG)[key].lineTo(b.x, b.y);
-          }
-          for (const phase of [0, GROOVE]) {
-            let prev = pt(from, phase);
-            for (let sx = from + STEP; sx <= to; sx += STEP) {
-              const q = pt(sx, phase);
-              const z = (q.z + prev.z) / 2;
-              if ((z >= 0) === front) { const key = level(z) * TAPERS + taper(sx); bb[key].moveTo(prev.x, prev.y); bb[key].lineTo(q.x, q.y); }
-              prev = q;
-            }
+        const bb = Array.from({ length: LEVELS }, () => new Path2D());
+        const rungA = Array.from({ length: LEVELS }, () => new Path2D());
+        const rungB = Array.from({ length: LEVELS }, () => new Path2D());
+        const first = Math.ceil((y0 + travel) / RUNG) * RUNG - travel;
+        for (let sy = first; sy < y1; sy += RUNG) {
+          const a = pt(sy, 0), b = pt(sy, GROOVE);
+          const z = (a.z + b.z) / 2;
+          if ((z >= 0) !== front) continue;
+          const k = Math.round((sy + travel) / RUNG);
+          const gc = ((k * 7919) % 5) < 2;
+          const lv = level(z);
+          const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+          rungA[lv].moveTo(a.x, a.y); rungA[lv].lineTo(mx, my);
+          (gc ? rungB : rungA)[lv].moveTo(mx, my); (gc ? rungB : rungA)[lv].lineTo(b.x, b.y);
+        }
+        for (const phase of [0, GROOVE]) {
+          let prev = pt(y0, phase);
+          for (let sy = y0 + STEP; sy <= y1; sy += STEP) {
+            const q = pt(sy, phase);
+            const z = (q.z + prev.z) / 2;
+            if ((z >= 0) === front) { bb[level(z)].moveTo(prev.x, prev.y); bb[level(z)].lineTo(q.x, q.y); }
+            prev = q;
           }
         }
-        for (let lv = 0; lv < LEVELS; lv++) for (let tp = 0; tp < TAPERS; tp++) {
-          const d = (lv + 0.5) / LEVELS, f = (tp + 1) / TAPERS, key = lv * TAPERS + tp;
-          ctx.lineWidth = 1 + d * 1.6;
-          ctx.strokeStyle = rgba(col.gold, (0.05 + d * 0.16 + lift) * f); ctx.stroke(rungG[key]);
-          ctx.strokeStyle = rgba(col.red, (0.05 + d * 0.18 + lift) * f); ctx.stroke(rungR[key]);
-          ctx.lineWidth = 1 + d * 3;
-          ctx.strokeStyle = rgba(col.gold, (0.07 + d * 0.28 + lift) * f); ctx.stroke(bb[key]);
+        for (let lv = 0; lv < LEVELS; lv++) {
+          const d = (lv + 0.5) / LEVELS;
+          ctx.lineWidth = 0.9 + d * 1.4;
+          ctx.strokeStyle = tint(0.08 + d * 0.2 + lift); ctx.stroke(rungA[lv]);
+          ctx.strokeStyle = rgba(col.dnaB, 0.08 + d * 0.22 + lift); ctx.stroke(rungB[lv]);
+          ctx.lineWidth = 1 + d * 2.8;
+          ctx.strokeStyle = tint(0.12 + d * 0.4 + lift); ctx.stroke(bb[lv]);
         }
       }
+      ctx.globalAlpha = 1;
     };
 
     const draw = (now: number, beat: number) => {
@@ -216,28 +210,25 @@ export default function HelixField() {
       ctx.clearRect(0, 0, W, H);
       drawHelix(now, beat);
 
-      // Traffic: faint trails for everything, brighter for whatever the cursor or a clinic has hold of.
-      const trails = [new Path2D(), new Path2D(), new Path2D(), new Path2D()]; // cell, crate, hot cell, hot crate
-      const heads = [new Path2D(), new Path2D(), new Path2D(), new Path2D()];
+      // Traffic: small medical crosses and parcels (a box with its tape), upright and rigid.
+      // Faint as a rule, brighter for whatever the cursor or a clinic has hold of.
+      const cross = [new Path2D(), new Path2D()], box = [new Path2D(), new Path2D()], tape = [new Path2D(), new Path2D()]; // [normal, hot]
       for (const p of parts) {
-        const hot = p.glow > 0.25 ? 2 : 0, kind = (p.cell ? 0 : 1) + hot;
-        const t = trails[kind];
-        let k = (p.n + 1) % TRAIL;
-        t.moveTo(p.trail[k * 2], p.trail[k * 2 + 1]);
-        for (let j = 1; j < TRAIL; j++) { k = (k + 1) % TRAIL; t.lineTo(p.trail[k * 2], p.trail[k * 2 + 1]); }
-        if (p.cell) { heads[kind].moveTo(p.x + 1.7, p.y); heads[kind].arc(p.x, p.y, 1.7, 0, Math.PI * 2); }
-        else heads[kind].rect(p.x - 1.5, p.y - 1.5, 3, 3);
+        const h = p.glow > 0.25 ? 1 : 0;
+        if (p.cross) {
+          cross[h].rect(p.x - 3.2, p.y - 1, 6.4, 2); cross[h].rect(p.x - 1, p.y - 3.2, 2, 6.4);
+        } else {
+          box[h].rect(p.x - 3, p.y - 2.4, 6, 4.8);
+          tape[h].moveTo(p.x, p.y - 2.4); tape[h].lineTo(p.x, p.y + 2.4);
+        }
       }
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = rgba(col.red, 0.1 + beat * 0.04); ctx.stroke(trails[0]);
-      ctx.strokeStyle = rgba(col.gold, 0.1 + beat * 0.04); ctx.stroke(trails[1]);
-      ctx.fillStyle = rgba(col.red, 0.32); ctx.fill(heads[0]);
-      ctx.fillStyle = rgba(col.gold, 0.32); ctx.fill(heads[1]);
-      ctx.lineWidth = 1.4;
-      ctx.strokeStyle = rgba(col.red, 0.42); ctx.stroke(trails[2]);
-      ctx.strokeStyle = rgba(col.gold, 0.42); ctx.stroke(trails[3]);
-      ctx.fillStyle = rgba(col.red, 0.85); ctx.fill(heads[2]);
-      ctx.fillStyle = rgba(col.gold, 0.85); ctx.fill(heads[3]);
+      for (const h of [0, 1]) {
+        const a = h ? 0.85 : 0.3;
+        ctx.fillStyle = rgba(col.red, a); ctx.fill(cross[h]);
+        ctx.lineWidth = h ? 1.3 : 1;
+        ctx.strokeStyle = rgba(col.gold, a); ctx.stroke(box[h]);
+        ctx.strokeStyle = rgba(col.red, a * 0.8); ctx.stroke(tape[h]);
+      }
 
       // The hub: a faint ring that beats with the heart.
       if (mouse.on) {
@@ -256,7 +247,7 @@ export default function HelixField() {
         ctx.beginPath(); ctx.arc(w.x, w.y, Math.max(0, r - 34), 0, Math.PI * 2); ctx.stroke();
       }
 
-      // Clinics: a cross in a square, a reach ring, and a pulse for every delivery.
+      // Clinics: a cross in a diamond, a reach ring, and a pulse for every delivery.
       for (const dp of depots) {
         const f = fade(dp, now);
         ctx.lineWidth = 1;
@@ -269,10 +260,10 @@ export default function HelixField() {
           ctx.strokeStyle = rgba(col.red, 0.6 * (1 - q) * f);
           ctx.beginPath(); ctx.arc(dp.x, dp.y, 10 + q * 26, 0, Math.PI * 2); ctx.stroke();
         }
-        const s = 9 + beat * 1.5;
+        const s = 13 + beat * 2;
         ctx.lineWidth = 1.6;
         ctx.strokeStyle = rgba(col.gold, 0.8 * f);
-        ctx.strokeRect(dp.x - s, dp.y - s, s * 2, s * 2);
+        ctx.beginPath(); ctx.moveTo(dp.x, dp.y - s); ctx.lineTo(dp.x + s, dp.y); ctx.lineTo(dp.x, dp.y + s); ctx.lineTo(dp.x - s, dp.y); ctx.closePath(); ctx.stroke();
         ctx.fillStyle = rgba(col.red, 0.9 * f);
         ctx.fillRect(dp.x - 1.6, dp.y - 5.5, 3.2, 11);
         ctx.fillRect(dp.x - 5.5, dp.y - 1.6, 11, 3.2);
@@ -288,12 +279,20 @@ export default function HelixField() {
       // Idle spin, plus whatever a drag or its momentum adds.
       turn += 0.004;
       if (!drag) { turn += spinV; spinV *= 0.9; if (Math.abs(spinV) < 0.0004) spinV = 0; }
+      // The DNA keeps its distance: if the cursor comes within reach, it slides to whichever side
+      // of the cursor is nearer its home in the middle, and drifts back once the cursor has gone.
+      let want = 0;
+      if (mouse.in && !drag) {
+        const reach = Math.min(W * 0.2, 250) + SHY, off = mouse.x - W / 2, room = W * 0.34;
+        if (Math.abs(off) < reach + room) want = off >= 0 ? Math.max(-room, Math.min(0, off - reach)) : Math.min(room, Math.max(0, off + reach));
+      }
+      dodge += (want - dodge) * (want ? 0.1 : 0.04);
       const beat = step(t);
       draw(t, beat);
     };
     const start = () => { if (!raf && !reduced && !document.hidden) { last = 0; raf = requestAnimationFrame(loop); } };
     const stop = () => { cancelAnimationFrame(raf); raf = 0; };
-    const still = () => { pos = target; draw(0, 0); };
+    const still = () => { pos = target; born = -FADE_IN; draw(0, 0); };
 
     // Open space only: never react on text, controls, cards or media.
     const openSpace = (t: Element) => !t.closest("a, button, input, textarea, select, label, p, h1, h2, h3, h4, li, dt, dd, figure, blockquote, img, svg, canvas, video, [role=dialog], .glass, .sl, .mc, .lab, .ae-backdrop, .site-header");
@@ -303,6 +302,7 @@ export default function HelixField() {
       if (e.pointerType === "touch") return;
       mouse.x = e.clientX; mouse.y = e.clientY;
       mouse.on = openSpace(e.target as Element);
+      mouse.in = true;
       if (drag) {
         const dx = e.clientX - drag.x;
         drag.moved += Math.abs(dx) + Math.abs(e.clientY - drag.y);
@@ -326,12 +326,13 @@ export default function HelixField() {
       depots.push({ x: e.clientX, y: e.clientY, born: now, hits: [] });
       if (depots.length > MAX_DEPOTS) depots.shift();
     };
-    const onLeave = () => { mouse.on = false; };
+    const onLeave = () => { mouse.on = false; mouse.in = false; };
     const onResize = () => { resize(); if (reduced) still(); };
     const onVis = () => (document.hidden ? stop() : start());
     const mood = new MutationObserver(() => { readColours(); if (reduced) still(); });
 
     readColours(); resize();
+    born = performance.now();
     if (reduced) still(); else start();
     mood.observe(document.documentElement, { attributes: true, attributeFilter: ["data-time"] });
     window.addEventListener("scroll", onScroll, { passive: true });

@@ -31,7 +31,7 @@ const subscribe = (cb: () => void) => {
 const read = () => (document.documentElement.dataset.time ?? "night") as Time;
 
 let busy = false;
-function setMood(time: Time, from: HTMLElement) {
+function setMood(time: Time) {
   const root = document.documentElement;
   const apply = () => {
     root.dataset.time = time;
@@ -39,10 +39,10 @@ function setMood(time: Time, from: HTMLElement) {
   };
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return apply();
   if (busy) return;
-  // Perfusion (moodTransition.ts): vessels branch out of this key, the new mood floods in
-  // behind them, and the page clears again in the new colours.
+  // The heartbeat (moodTransition.ts): lights down, blood streams in, a heartbeat trace beats and pumps
+  // the new mood out across the page.
   busy = true;
-  perfuse(time, from, () => { apply(); setTimeout(() => { busy = false; }, 760); });
+  perfuse(time, () => { apply(); setTimeout(() => { busy = false; }, 760); });
 }
 
 export default function TimeKeys() {
@@ -55,7 +55,7 @@ export default function TimeKeys() {
       className="tk-key tk-one"
       aria-label={`Mood: ${now.label}. Switch to ${next.label}`}
       title={`${now.label} — click for ${next.label.toLowerCase()}`}
-      onClick={(e) => setMood(next.id, e.currentTarget)}
+      onClick={() => setMood(next.id)}
     >
       <svg key={now.id} viewBox="0 0 24 24" aria-hidden="true">{now.icon}</svg>
       <span>{now.label}</span>

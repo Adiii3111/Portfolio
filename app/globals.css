@@ -80,7 +80,7 @@
   --glass: linear-gradient(180deg, #FFFFFFcc, #FFFFFF80), #E2ECF18c;
   --blood: #B02A35;
   --sky: radial-gradient(70% 60% at 0% 100%, #FFD7BD8c, transparent 70%), radial-gradient(60% 50% at 100% 0%, #FFFFFF99, transparent 70%);
-  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53;
+  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53; --dna-a: 46, 170, 190; --dna-b: 226, 104, 140;
 }
 :root[data-time="afternoon"] {
   --bg: #F6EEDC; --bg-top: #FBF5E6; --bg-2: #EFE4CD; --band: #FFFFFF52;
@@ -89,7 +89,7 @@
   --glass: linear-gradient(180deg, #FFFDF6d6, #FFFDF68a), #F6EEDC8c;
   --blood: #A3262A;
   --sky: radial-gradient(55% 45% at 92% -5%, #FFE7A3b3, transparent 70%), radial-gradient(80% 60% at 0% 100%, #F2D9AE59, transparent 70%);
-  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40;
+  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40; --dna-a: 224, 150, 40; --dna-b: 214, 96, 120;
 }
 :root[data-time="evening"] {
   --bg: #1B1322; --bg-top: #24172B; --bg-2: #22182A; --band: #FFFFFF05;
@@ -98,13 +98,13 @@
   --glass: linear-gradient(180deg, #F3E7E114, #F3E7E105), #1F1628cc;
   --blood: #F06A5C;
   --sky: radial-gradient(110% 55% at 50% 115%, #E9714A6b, #9B3F6A26 45%, transparent 75%);
-  --field-a: 196, 128, 140; --field-b: 242, 145, 106; --field-hot: 240, 106, 92;
+  --field-a: 196, 128, 140; --field-b: 242, 145, 106; --field-hot: 240, 106, 92; --dna-a: 255, 214, 170; --dna-b: 249, 168, 212;
 }
 :root[data-time="night"], :root:not([data-time]) {
   --bg: #04070D; --bg-top: #08101E; --bg-2: #0A1220;
   --glass: linear-gradient(180deg, #F4F0E814, #F4F0E805), #0A1220cc;
   --sky: radial-gradient(45% 40% at 12% -5%, #8FA8D62e, transparent 70%);
-  --field-a: 150, 135, 105; --field-b: 226, 205, 164; --field-hot: 232, 97, 91;
+  --field-a: 150, 135, 105; --field-b: 226, 205, 164; --field-hot: 232, 97, 91; --dna-a: 158, 231, 255; --dna-b: 255, 179, 199;
 }
 
 /* Dark "instrument" surfaces keep dark tokens whatever the page theme is. */
@@ -211,7 +211,7 @@ html[data-intro="done"] .intro { display: none; }
 .tk-one .tk-led { position: static; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: tk-led 1.2s ease infinite; }
 @keyframes tk-in { from { opacity: 0; transform: rotate(-90deg) scale(.4); } to { opacity: 1; transform: none; } }
 @keyframes tk-led { 0%, 100% { opacity: 1; } 12% { opacity: .35; } 24% { opacity: 1; } 36% { opacity: .5; } }
-/* Mood transition: perfusion, drawn on this one-off canvas by moodTransition.ts. Section reveals spread in from the corner the same way (see .reveal). */
+/* Mood transition: lights down, blood streams in, a heartbeat trace beats and pumps the new mood out (drawn on this one-off canvas by moodTransition.ts). */
 .mood-perfusion { position: fixed; inset: 0; z-index: 400; width: 100%; height: 100%; pointer-events: none; }
 .brand { display: flex; align-items: center; margin-right: auto; }
 .brand-mark { font: 500 26px/1 var(--serif); letter-spacing: .02em; color: var(--accent); }
