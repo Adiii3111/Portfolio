@@ -49,8 +49,8 @@
 .aa-form input { flex: 1; min-width: 0; padding: 13px 14px; border: 1px solid color-mix(in srgb, var(--accent, #E2CDA4) 30%, transparent); background: color-mix(in srgb, var(--bg, #0A1322) 70%, #000); color: var(--fg, #F4F0E8); font: inherit; font-size: 15px; clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px); }
 .aa-form input:focus { outline: none; border-color: var(--accent, #E2CDA4); }
 .aa-form input::placeholder { color: var(--muted, #A9AAA6); }
-.aa-form button { flex: none; padding: 0 22px; border: 0; background: var(--gold, #C5A572); color: #0B1423; font: 700 12px/1 var(--sans, system-ui); letter-spacing: .18em; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
-.aa-form button:disabled { opacity: .45; cursor: default; }
+.aa-form button { flex: none; padding: 0 22px; border: 0; background: var(--accent); color: var(--on-accent); font: 700 12px/1 var(--sans, system-ui); letter-spacing: .18em; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.aa-form button:disabled { opacity: .6; cursor: default; }
 .aa-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @keyframes aa-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

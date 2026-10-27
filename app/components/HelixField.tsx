@@ -86,8 +86,11 @@ export default function HelixField() {
     const mouse = { x: -1, y: -1, on: false };   // on: over open space
     let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91], dnaA: [158, 231, 255], dnaB: [255, 179, 199], white: [236, 236, 246], nucleus: [150, 110, 196], platelet: [232, 206, 160] };
     let dnaK = 1;   // how strongly the DNA is drawn in this mood (--dna-strength: light moods need more)
+    let redK = 1;   // red cells are dark red specks on the dark moods, so they get a boost there (--cell-red-boost)
     const readColours = () => {
-      dnaK = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--dna-strength")) || 1;
+      const cs = getComputedStyle(document.documentElement);
+      dnaK = parseFloat(cs.getPropertyValue("--dna-strength")) || 1;
+      redK = parseFloat(cs.getPropertyValue("--cell-red-boost")) || 1;
       col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199"), white: readRGB("--cell-white", "236,236,246"), nucleus: readRGB("--cell-nucleus", "150,110,196"), platelet: readRGB("--cell-platelet", "232,206,160") };
     };
 
@@ -253,8 +256,9 @@ export default function HelixField() {
           const r = 3 + p.z * 4.5;
           ctx.scale(1, 0.35 + 0.65 * Math.abs(Math.cos(p.tumble)));
           const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-          g.addColorStop(0, rgba(col.red, a * 0.35)); g.addColorStop(0.5, rgba(col.red, a * 0.55));
-          g.addColorStop(0.78, rgba(col.red, a)); g.addColorStop(1, rgba(col.red, 0));
+          const ar = a * redK;
+          g.addColorStop(0, rgba(col.red, ar * 0.35)); g.addColorStop(0.5, rgba(col.red, ar * 0.55));
+          g.addColorStop(0.78, rgba(col.red, ar)); g.addColorStop(1, rgba(col.red, 0));
           ctx.fillStyle = g;
           ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
         } else if (p.kind === "white") {

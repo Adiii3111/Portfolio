@@ -45,7 +45,7 @@ export default function WorldMap({
         return (
           <g key={m.at} className={`map-marker ${m.className ?? ""}`} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}>
             <circle className="map-marker-ring" r="14" />
-            <circle className="map-marker-dot" r="4.5" />
+            <circle className="map-marker-dot" r="8" />
           </g>
         );
       })}
