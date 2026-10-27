@@ -8,9 +8,9 @@ export function finishIntro() {
 }
 
 // Timeline (ms from the moment the page arrives). Keep in step with the .intro.is-live rules in globals.css.
-const GROW = [0, 350];        // the helix pops up and grows out from the middle
-const UNZIP = [650, 1300];    // it unzips and the two strands sweep off to the edges
-const END = 1800;
+const GROW = [0, 450];        // the helix pops up and grows out from the middle
+const UNZIP = [900, 1700];    // it unzips and the two strands sweep off to the edges
+const END = 2200;
 
 /*
  * The DNA is drawn by a small inline script rather than from React, so it starts the moment
@@ -38,7 +38,7 @@ if(t<${END})requestAnimationFrame(frame);else{root.dataset.intro="done";try{sess
 requestAnimationFrame(frame)})();`;
 
 /**
- * A ~1.7s opening sequence: a DNA double helix pops up in the middle of a dark screen, base
+ * A ~2.1s opening sequence: a DNA double helix pops up in the middle of a dark screen, base
  * pairs popping in as it turns. Then it unzips, and as it splits Aditya's name pops up in
  * the gap; the name holds for a moment while one strand sweeps off to the top-right edge
  * and the other to the bottom-left, where the page's two DNA spines live, and then the

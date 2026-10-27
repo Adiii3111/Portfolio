@@ -17,7 +17,7 @@
   --gutter: max(22px, calc((100% - 1240px) / 2));
   --ease: cubic-bezier(.2, .7, .2, 1);
   --perfuse-ease: cubic-bezier(.4, 0, .2, 1);
-  --hd: 1.7s; /* hero entrance delay: the hero comes in once the intro has gone */
+  --hd: 2.05s; /* hero entrance delay: the hero comes in once the intro has gone */
   --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
 }
 
@@ -168,11 +168,11 @@ html.js-reveal .reveal.in { opacity: 1; animation: rv-perfuse 1.2s var(--perfuse
 /* Opening: a DNA helix grows, the name comes up, the helix unzips to the edges (Intro.tsx). */
 .intro { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 45%, #101b30, #04070D 72%); cursor: pointer; animation: introOut .5s ease 3s forwards; }
 /* Once the DNA is drawing (Intro.tsx adds .is-live), the timeline restarts from that moment. */
-.intro.is-live { animation: introOutLive .45s ease 1.25s forwards; }
+.intro.is-live { animation: introOutLive .5s ease 1.6s forwards; }
 html[data-intro="done"] .intro { display: none; }
 .intro-dna { position: absolute; inset: 0; width: 100%; height: 100%; }
 .intro-id { position: relative; display: grid; justify-items: center; gap: 14px; padding: 22px 30px; text-align: center; background: radial-gradient(closest-side, #04070Dd9, #04070D00); opacity: 0; }
-.intro.is-live .intro-id { animation: introId .25s var(--ease) .7s both; }
+.intro.is-live .intro-id { animation: introId .3s var(--ease) .95s both; }
 .intro-id h2 { font: 500 clamp(26px, 4.2vw, 58px)/1.05 var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--ivory); }
 @keyframes introId { from { opacity: 0; transform: scale(.92); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 .intro-skip { position: absolute; right: 24px; bottom: 24px; z-index: 2; padding: 11px 18px; border: 1px solid #F4F0E840; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ivory); transition: border-color .3s, color .3s; }
