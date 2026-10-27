@@ -80,7 +80,7 @@
   --glass: linear-gradient(180deg, #FFFFFFcc, #FFFFFF80), #E2ECF18c;
   --blood: #B02A35;
   --sky: radial-gradient(70% 60% at 0% 100%, #FFD7BD8c, transparent 70%), radial-gradient(60% 50% at 100% 0%, #FFFFFF99, transparent 70%);
-  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53; --dna-a: 46, 170, 190; --dna-b: 226, 104, 140;
+  --field-a: 40, 92, 112; --field-b: 26, 106, 118; --field-hot: 176, 42, 53; --dna-a: 46, 170, 190; --dna-b: 226, 104, 140; --cell-white: 120, 130, 160; --cell-nucleus: 104, 70, 150; --cell-platelet: 170, 128, 70;
 }
 :root[data-time="afternoon"] {
   --bg: #F6EEDC; --bg-top: #FBF5E6; --bg-2: #EFE4CD; --band: #FFFFFF52;
@@ -89,7 +89,7 @@
   --glass: linear-gradient(180deg, #FFFDF6d6, #FFFDF68a), #F6EEDC8c;
   --blood: #A3262A;
   --sky: radial-gradient(55% 45% at 92% -5%, #FFE7A3b3, transparent 70%), radial-gradient(80% 60% at 0% 100%, #F2D9AE59, transparent 70%);
-  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40; --dna-a: 224, 150, 40; --dna-b: 214, 96, 120;
+  --field-a: 128, 94, 52; --field-b: 160, 98, 26; --field-hot: 168, 40, 40; --dna-a: 224, 150, 40; --dna-b: 214, 96, 120; --cell-white: 130, 120, 140; --cell-nucleus: 110, 70, 140; --cell-platelet: 176, 124, 50;
 }
 :root[data-time="evening"] {
   --bg: #1B1322; --bg-top: #24172B; --bg-2: #22182A; --band: #FFFFFF05;
@@ -98,13 +98,13 @@
   --glass: linear-gradient(180deg, #F3E7E114, #F3E7E105), #1F1628cc;
   --blood: #F06A5C;
   --sky: radial-gradient(110% 55% at 50% 115%, #E9714A6b, #9B3F6A26 45%, transparent 75%);
-  --field-a: 196, 128, 140; --field-b: 242, 145, 106; --field-hot: 240, 106, 92; --dna-a: 255, 214, 170; --dna-b: 249, 168, 212;
+  --field-a: 196, 128, 140; --field-b: 242, 145, 106; --field-hot: 240, 106, 92; --dna-a: 255, 214, 170; --dna-b: 249, 168, 212; --cell-white: 240, 228, 240; --cell-nucleus: 170, 120, 200; --cell-platelet: 245, 205, 150;
 }
 :root[data-time="night"], :root:not([data-time]) {
   --bg: #04070D; --bg-top: #08101E; --bg-2: #0A1220;
   --glass: linear-gradient(180deg, #F4F0E814, #F4F0E805), #0A1220cc;
   --sky: radial-gradient(45% 40% at 12% -5%, #8FA8D62e, transparent 70%);
-  --field-a: 150, 135, 105; --field-b: 226, 205, 164; --field-hot: 232, 97, 91; --dna-a: 158, 231, 255; --dna-b: 255, 179, 199;
+  --field-a: 150, 135, 105; --field-b: 226, 205, 164; --field-hot: 232, 97, 91; --dna-a: 158, 231, 255; --dna-b: 255, 179, 199; --cell-white: 236, 236, 246; --cell-nucleus: 150, 110, 196; --cell-platelet: 232, 206, 160;
 }
 
 /* Dark "instrument" surfaces keep dark tokens whatever the page theme is. */

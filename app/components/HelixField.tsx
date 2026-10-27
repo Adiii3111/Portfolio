@@ -3,16 +3,18 @@
 import { useEffect, useRef } from "react";
 
 /*
- * The site-wide backdrop: circulation. Red blood cells drift across the whole screen on
- * slow, branching currents, as if seen under a microscope: soft, a little out of focus,
- * tumbling as they go, and the flow surges on a lub-dub heartbeat. A straight DNA double
+ * The site-wide backdrop: circulation. Blood drifts across the whole screen on slow,
+ * branching currents, as if seen under a microscope: red cells tumbling as they go, the odd
+ * white cell with its lobed nucleus, and tiny platelets, all a little out of focus. The
+ * flow surges on a lub-dub heartbeat. A straight DNA double
  * helix in light, bright colours runs down the middle; it fades in when the page opens and
  * turns as you scroll.
  *
  * It's there to be played with, quietly:
  *  - the cursor is a hub: cells near it are pulled into a swirl and follow you around;
- *  - clicking open space drops a clinic (a cross in a diamond) that draws cells in, each
- *    arrival "delivered" with a pulse, and sends a heartbeat shockwave out from the click.
+ *  - clicking open space places a hospital (a cross in a diamond): cells from across the
+ *    screen rush to it, each one admitted with a pulse, and a heartbeat shockwave goes out
+ *    from the click.
  * Everything stays faint and only brightens near the cursor, so the content stays first.
  *
  * Drawn at ~30 fps and 1 device pixel per CSS pixel (the glass cards blur whatever is
@@ -33,18 +35,20 @@ const LEVELS = 4;        // depth bands, batched
 const FADE_IN = 1800;    // ms for the DNA to fade in on load
 
 // Circulation.
-const DENSITY = 1 / 34000;  // cells per px²
-const MAX_PARTS = 48;
+const DENSITY = 1 / 16000;  // cells per px²
+const MAX_PARTS = 110;
 const SPEED = 0.42;         // px per frame at rest, for a cell in the middle distance
 const HUB_R = 170;          // cursor hub radius
-const DEPOT_R = 230;        // how far a clinic reaches
+const DEPOT_R = 620;        // how far a hospital's pull reaches
 const DEPOT_LIFE = 14000;   // ms
 const MAX_DEPOTS = 4;
 const BEAT_MS = 1500;       // one heartbeat
 
-// A blood cell: z is its depth (0 far, 1 near), which sets its size, speed and focus; spin
-// and tumble turn it as it drifts.
-type Part = { x: number; y: number; vx: number; vy: number; z: number; spin: number; tumble: number; glow: number };
+// A blood cell: red cell, white cell or platelet. z is its depth (0 far, 1 near), which sets
+// its size, speed and focus; spin and tumble turn it as it drifts.
+type Kind = "red" | "white" | "platelet";
+type Part = { x: number; y: number; vx: number; vy: number; kind: Kind; z: number; spin: number; tumble: number; glow: number };
+const pickKind = (): Kind => { const r = Math.random(); return r < 0.7 ? "red" : r < 0.82 ? "white" : "platelet"; };
 type Depot = { x: number; y: number; born: number; hits: number[] };
 type Wave = { x: number; y: number; born: number };
 
@@ -75,13 +79,13 @@ export default function HelixField() {
     const depots: Depot[] = [];
     const waves: Wave[] = [];
     const mouse = { x: -1, y: -1, on: false };   // on: over open space
-    let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91], dnaA: [158, 231, 255], dnaB: [255, 179, 199] };
-    const readColours = () => { col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199") }; };
+    let col = { line: [197, 165, 114], gold: [226, 205, 164], red: [232, 97, 91], dnaA: [158, 231, 255], dnaB: [255, 179, 199], white: [236, 236, 246], nucleus: [150, 110, 196], platelet: [232, 206, 160] };
+    const readColours = () => { col = { line: readRGB("--field-a", "197,165,114"), gold: readRGB("--field-b", "226,205,164"), red: readRGB("--field-hot", "232,97,91"), dnaA: readRGB("--dna-a", "158,231,255"), dnaB: readRGB("--dna-b", "255,179,199"), white: readRGB("--cell-white", "236,236,246"), nucleus: readRGB("--cell-nucleus", "150,110,196"), platelet: readRGB("--cell-platelet", "232,206,160") }; };
 
     const spawn = (edge: boolean): Part => {
       let x = Math.random() * W, y = Math.random() * H;
       if (edge) { if (Math.random() < 0.5) x = Math.random() < 0.5 ? -4 : W + 4; else y = Math.random() < 0.5 ? -4 : H + 4; }
-      return { x, y, vx: 0, vy: 0, z: Math.random(), spin: Math.random() * Math.PI, tumble: Math.random() * Math.PI * 2, glow: 0 };
+      return { x, y, vx: 0, vy: 0, kind: pickKind(), z: Math.random(), spin: Math.random() * Math.PI, tumble: Math.random() * Math.PI * 2, glow: 0 };
     };
 
     const resize = () => {
@@ -121,11 +125,12 @@ export default function HelixField() {
         for (const dp of depots) {
           const mx = dp.x - p.x, my = dp.y - p.y, d = Math.hypot(mx, my);
           if (d < 9) { dp.hits.push(now); parts[i] = spawn(true); break; }
-          if (d < DEPOT_R) { const f = (1 - d / DEPOT_R) * fade(dp, now); tx += (mx / d) * 3.2 * f; ty += (my / d) * 3.2 * f; near = Math.max(near, f * 0.8); }
+          // Rush: a firm pull from anywhere in reach, firmer still close in.
+          if (d < DEPOT_R) { const f = (0.45 + 0.55 * (1 - d / DEPOT_R)) * fade(dp, now); tx += (mx / d) * 4.2 * f; ty += (my / d) * 4.2 * f; near = Math.max(near, f * 0.8); }
         }
         if (parts[i] !== p) continue;
         for (const w of waves) {
-          const age = now - w.born, r = age * 0.55;
+          const age = Math.max(0, now - w.born), r = age * 0.55;
           const mx = p.x - w.x, my = p.y - w.y, d = Math.hypot(mx, my) || 1;
           if (Math.abs(d - r) < 28) { const f = 2.6 * (1 - age / 1600); p.vx += (mx / d) * f; p.vy += (my / d) * f; p.glow = 1; }
         }
@@ -209,23 +214,38 @@ export default function HelixField() {
       ctx.clearRect(0, 0, W, H);
       drawHelix(now, beat);
 
-      // Blood cells: biconcave discs, brighter at the rim than in the dimple, seen face-on or
-      // edge-on as they tumble. Far ones are small, faint and soft; near ones larger and clearer.
+      // Blood cells, smaller and fainter the further away they are.
+      //  red: a biconcave disc, brighter at the rim than in the dimple, face-on or edge-on as it tumbles;
+      //  white: a larger pale cell with a lobed nucleus;
+      //  platelet: a tiny irregular fragment.
       for (const p of parts) {
-        const r = 6 + p.z * 13;
-        const a = (0.08 + p.z * 0.16) + Math.min(1, p.glow) * 0.4;
-        const squash = 0.35 + 0.65 * Math.abs(Math.cos(p.tumble));
+        const a = (0.1 + p.z * 0.16) + Math.min(1, p.glow) * 0.4;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.spin);
-        ctx.scale(1, squash);
-        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-        g.addColorStop(0, rgba(col.red, a * 0.35));
-        g.addColorStop(0.5, rgba(col.red, a * 0.55));
-        g.addColorStop(0.78, rgba(col.red, a));
-        g.addColorStop(1, rgba(col.red, 0));
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+        if (p.kind === "red") {
+          const r = 3 + p.z * 4.5;
+          ctx.scale(1, 0.35 + 0.65 * Math.abs(Math.cos(p.tumble)));
+          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+          g.addColorStop(0, rgba(col.red, a * 0.35)); g.addColorStop(0.5, rgba(col.red, a * 0.55));
+          g.addColorStop(0.78, rgba(col.red, a)); g.addColorStop(1, rgba(col.red, 0));
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+        } else if (p.kind === "white") {
+          const r = 4.5 + p.z * 4.5;
+          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+          g.addColorStop(0, rgba(col.white, a * 0.7)); g.addColorStop(0.8, rgba(col.white, a * 0.9)); g.addColorStop(1, rgba(col.white, 0));
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = rgba(col.nucleus, a * 1.4);
+          ctx.beginPath();
+          for (let k = 0; k < 3; k++) { const q = k * 2.1 + p.tumble * 0.2; ctx.moveTo(Math.cos(q) * r * 0.32 + r * 0.24, Math.sin(q) * r * 0.32); ctx.arc(Math.cos(q) * r * 0.32, Math.sin(q) * r * 0.32, r * 0.24, 0, Math.PI * 2); }
+          ctx.fill();
+        } else {
+          const r = 1.2 + p.z * 1.4;
+          ctx.fillStyle = rgba(col.platelet, a * 1.6);
+          ctx.beginPath(); ctx.ellipse(0, 0, r * 1.4, r, 0, 0, Math.PI * 2); ctx.fill();
+        }
         ctx.restore();
       }
 
@@ -238,7 +258,7 @@ export default function HelixField() {
 
       // Heartbeat shockwaves from clicks.
       for (const w of waves) {
-        const age = now - w.born, r = age * 0.55, a = 1 - age / 1600;
+        const age = Math.max(0, now - w.born), r = age * 0.55, a = 1 - age / 1600;
         ctx.lineWidth = 1.5;
         ctx.strokeStyle = rgba(col.red, 0.35 * a);
         ctx.beginPath(); ctx.arc(w.x, w.y, r, 0, Math.PI * 2); ctx.stroke();
@@ -246,13 +266,13 @@ export default function HelixField() {
         ctx.beginPath(); ctx.arc(w.x, w.y, Math.max(0, r - 34), 0, Math.PI * 2); ctx.stroke();
       }
 
-      // Clinics: a cross in a diamond, a reach ring, and a pulse for every delivery.
+      // Hospitals: a cross in a diamond, a reach ring, and a pulse for every cell admitted.
       for (const dp of depots) {
         const f = fade(dp, now);
         ctx.lineWidth = 1;
         ctx.strokeStyle = rgba(col.gold, 0.12 * f);
         ctx.setLineDash([2, 6]);
-        ctx.beginPath(); ctx.arc(dp.x, dp.y, DEPOT_R * (0.94 + beat * 0.04), 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(dp.x, dp.y, 46 * (0.92 + beat * 0.12), 0, Math.PI * 2); ctx.stroke();
         ctx.setLineDash([]);
         for (const h of dp.hits) {
           const q = (now - h) / 700;

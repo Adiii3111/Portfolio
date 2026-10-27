@@ -81,7 +81,7 @@ export default function Home() {
           </div>
 
           <StatCards stats={heroStats} />
-          <p className="hero-hint" aria-hidden="true">Stir the circulation with your cursor · click open space to open a clinic · <a href="#match">hiring? open AETERNUS →</a></p>
+          <p className="hero-hint" aria-hidden="true">Stir the circulation with your cursor · click open space to place a hospital · <a href="#match">hiring? open AETERNUS →</a></p>
           <PulseChain />
         </section>
 
