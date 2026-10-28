@@ -5,10 +5,15 @@ import { createPortal } from "react-dom";
 import { person } from "../content";
 
 /**
- * The header's "Connect": a short panel with direct LinkedIn, email and phone
- * links, for visitors who want to reach Aditya without scrolling to the end.
- * The longer "Start a conversation" form stays in the Contact section.
+ * The header's "Connect": a short panel for visitors who want to reach Aditya
+ * without scrolling to the end. Gmail and Outlook open a new message to him,
+ * ready to type; LinkedIn opens his profile; Phone calls or texts. Nothing to
+ * copy and paste. The longer "Start a conversation" form stays in the Contact
+ * section.
  */
+const SUBJECT = "Hello Aditya — via your portfolio";
+const BODY = "Hi Aditya,\n\n";
+const enc = encodeURIComponent;
 export default function QuickConnect({ className, children, onOpen }: { className?: string; children: React.ReactNode; onOpen?: () => void }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState("");
@@ -27,9 +32,10 @@ export default function QuickConnect({ className, children, onOpen }: { classNam
     try { await navigator.clipboard.writeText(text); setCopied(label); setTimeout(() => setCopied(""), 2000); } catch { setCopied("Copy failed — select the text instead"); }
   };
 
-  const ways = [
+  const ways: { name: string; value: string; href: string; external?: boolean; copy?: string; copyLabel?: string }[] = [
+    { name: "Gmail", value: `Write to ${person.email}`, href: `https://mail.google.com/mail/?view=cm&fs=1&to=${enc(person.email)}&su=${enc(SUBJECT)}&body=${enc(BODY)}`, external: true },
+    { name: "Outlook", value: `Write to ${person.email} in Outlook`, href: `https://outlook.live.com/mail/0/deeplink/compose?to=${enc(person.email)}&subject=${enc(SUBJECT)}&body=${enc(BODY)}`, external: true },
     { name: "LinkedIn", value: "Message me on LinkedIn", href: person.linkedin, external: true },
-    { name: "Email", value: person.email, href: `mailto:${person.email}`, copy: person.email, copyLabel: "Email copied" },
     { name: "Phone", value: `Call or text ${person.phone}`, href: person.phoneHref, copy: person.phone, copyLabel: "Phone number copied" },
   ];
 
@@ -48,7 +54,7 @@ export default function QuickConnect({ className, children, onOpen }: { classNam
                   <a ref={i === 0 ? firstLink : undefined} className="qc-main" href={w.href} {...(w.external && { target: "_blank", rel: "noreferrer" })}>
                     <b>{w.name}{w.external && " ↗"}</b><span>{w.value}</span>
                   </a>
-                  {w.copy && <button type="button" className="qc-copy" onClick={() => copy(w.copy, w.copyLabel)} aria-label={`Copy ${w.copy}`}>Copy</button>}
+                  {w.copy && <button type="button" className="qc-copy" onClick={() => copy(w.copy!, w.copyLabel ?? "Copied")} aria-label={`Copy ${w.copy}`}>Copy</button>}
                 </li>
               ))}
             </ul>
