@@ -33,8 +33,10 @@ export default function QuickConnect({ className, children, onOpen }: { classNam
   };
 
   const ways: { name: string; value: string; href: string; external?: boolean; copy?: string; copyLabel?: string }[] = [
-    { name: "Gmail", value: person.email, href: `https://mail.google.com/mail/?view=cm&fs=1&to=${enc(person.email)}&su=${enc(SUBJECT)}&body=${enc(BODY)}`, external: true },
-    { name: "Outlook", value: person.email, href: `https://outlook.live.com/mail/0/deeplink/compose?to=${enc(person.email)}&subject=${enc(SUBJECT)}&body=${enc(BODY)}`, external: true },
+    // Same lines as the message form's options (ContactLauncher): Gmail goes to the personal
+    // address, Outlook to the Northeastern one.
+    { name: "Gmail", value: `Write to ${person.email}`, href: `https://mail.google.com/mail/?view=cm&fs=1&to=${enc(person.email)}&su=${enc(SUBJECT)}&body=${enc(BODY)}`, external: true },
+    { name: "Outlook", value: `Write to ${person.collegeEmail}`, href: `https://outlook.live.com/mail/0/deeplink/compose?to=${enc(person.collegeEmail)}&subject=${enc(SUBJECT)}&body=${enc(BODY)}`, external: true },
     { name: "LinkedIn", value: "Message me on LinkedIn", href: person.linkedin, external: true },
     { name: "Phone", value: `Call or text ${person.phone}`, href: person.phoneHref, copy: person.phone, copyLabel: "Phone number copied" },
   ];

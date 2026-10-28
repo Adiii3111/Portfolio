@@ -35,7 +35,7 @@ export default function ContactLauncher({ className, children }: { className?: s
   const body = `Hi Aditya,\n\n${message}\n\n— ${name}${from ? `\n${from}` : ""}`;
   const enc = encodeURIComponent;
   const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${enc(person.email)}&su=${enc(subject)}&body=${enc(body)}`;
-  const outlook = `https://outlook.live.com/mail/0/deeplink/compose?to=${enc(person.email)}&subject=${enc(subject)}&body=${enc(body)}`;
+  const outlook = `https://outlook.live.com/mail/0/deeplink/compose?to=${enc(person.collegeEmail)}&subject=${enc(subject)}&body=${enc(body)}`;
 
   const copy = async (text: string, label: string) => {
     try { await navigator.clipboard.writeText(text); setCopied(label); setTimeout(() => setCopied(""), 2000); } catch { setCopied("Copy failed — select the text instead"); }
@@ -69,7 +69,7 @@ export default function ContactLauncher({ className, children }: { className?: s
                 <p className="cl-preview"><strong>{subject}</strong><br />{message.length > 140 ? message.slice(0, 140) + "…" : message}</p>
                 <div className="cl-options">
                   <a href={gmail} target="_blank" rel="noreferrer" className="cl-option"><b>Gmail</b><span>Write to {person.email}</span></a>
-                  <a href={outlook} target="_blank" rel="noreferrer" className="cl-option"><b>Outlook</b><span>Send from your Outlook account</span></a>
+                  <a href={outlook} target="_blank" rel="noreferrer" className="cl-option"><b>Outlook</b><span>Write to {person.collegeEmail}</span></a>
                   {/* LinkedIn can't be opened with a message filled in, so the message is copied as they click: on the profile they only press Message and paste. */}
                   <a href={person.linkedin} target="_blank" rel="noreferrer" className="cl-option" onClick={() => copy(`${subject}\n\n${body}`, "Your message is copied — press Message on LinkedIn and paste it")}><b>LinkedIn</b><span>Message me on LinkedIn</span></a>
                   <a href={person.phoneHref} className="cl-option"><b>Phone</b><span>Call or text {person.phone}</span></a>
