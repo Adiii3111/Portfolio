@@ -19,6 +19,10 @@ type Tab = "ask" | "match";
 type Phase = "closed" | "launch" | "open";
 
 const INF = "M12 12C9.6 8.4 3.5 8.4 3.5 12C3.5 15.6 9.6 15.6 12 12C14.4 8.4 20.5 8.4 20.5 12C20.5 15.6 14.4 15.6 12 12Z";
+// The ring's letters each ride the launcher's outline (offset-path in aeternus-dock.css),
+// spaced evenly and staggered so the line runs round it without a seam.
+const RING = Array.from("ASK ME ABOUT ADITYA · AETERNUS · ").map((c) => (c === " " ? " " : c));
+const RING_S = 24;   // seconds per lap; matches .ae-ring i
 const LAUNCH_MS = 1550;   // matches the ae-ls-* animations in aeternus-dock.css: the name is fully up for about half a second
 
 export default function AeternusDock() {
@@ -74,10 +78,11 @@ export default function AeternusDock() {
 
   return (
     <>
-      <svg className={`ae-ring ${phase !== "closed" ? "is-open" : ""}`} viewBox="0 0 104 104" aria-hidden="true">
-        <defs><path id="ae-ring-path" d="M52 52m-44 0a44 44 0 1 1 88 0a44 44 0 1 1-88 0" /></defs>
-        <text><textPath href="#ae-ring-path" textLength="274" lengthAdjust="spacing">ASK ME ABOUT ADITYA · AETERNUS ·</textPath></text>
-      </svg>
+      <span className={`ae-ring ${phase !== "closed" ? "is-open" : ""}`} aria-hidden="true">
+        {RING.map((ch, i) => (
+          <i key={i} style={{ offsetDistance: `${(i / RING.length) * 100}%`, animationDelay: `${(-i / RING.length) * RING_S}s` }}>{ch}</i>
+        ))}
+      </span>
       <button ref={launcher} className={`ae-launch ${phase !== "closed" ? "is-open" : ""}`} onClick={() => (phase === "closed" ? launch() : close())} aria-expanded={open} aria-controls="aeternus" aria-label="Open AETERNUS — ask anything about Aditya" title="AETERNUS" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         <span className="ae-mark" aria-hidden="true">
           <InfinityMark size={34} speed={hover ? 3 : 1} />

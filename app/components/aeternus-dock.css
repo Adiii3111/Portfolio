@@ -12,11 +12,12 @@
 .ae-inf { display: block; color: var(--accent); }
 .ae-mark { width: 44px; height: 44px; }
 
-/* Ring: "Ask me about Aditya" turns slowly round the launcher, like the hero portrait's ring.
-   It sits in the launcher's own corner (centred on it), so it never covers the page. */
-.ae-ring { position: fixed; right: 8px; bottom: 8px; z-index: 139; width: 104px; height: 104px; pointer-events: none; overflow: visible; animation: spin 22s linear infinite; transition: opacity .3s; }
-.ae-ring text { font: 700 8.4px/1 var(--sans); fill: var(--accent); paint-order: stroke; stroke: var(--bg); stroke-width: 2.4px; stroke-linejoin: round; }
+/* Ring: "Ask me about Aditya" glides along the launcher's own chamfered edge, a few pixels out.
+   The letters stay upright as they travel (nothing spins). The box is the launcher plus 10px each side. */
+.ae-ring { position: fixed; right: 20px; bottom: 20px; z-index: 139; width: 80px; height: 80px; pointer-events: none; transition: opacity .3s; }
+.ae-ring i { position: absolute; left: 0; top: 0; font: 700 7px/1 var(--sans); font-style: normal; color: var(--accent); text-shadow: 0 0 3px var(--bg), 0 0 2px var(--bg); offset-path: path("M18.5 4H72Q76 4 76 8V61.5L61.5 76H8Q4 76 4 72V18.5Z"); offset-anchor: center; offset-rotate: 0deg; animation: ae-crawl 24s linear infinite; }
 .ae-ring.is-open { opacity: 0; }
+@keyframes ae-crawl { from { offset-distance: 0%; } to { offset-distance: 100%; } }
 
 /* Launch: the mark flies from its corner to the centre and grows, the name opens out letter
    by letter beneath it, the tagline follows, and the whole thing hands over to the panel. */
@@ -72,5 +73,5 @@ html.aeternus-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .ae-launch::before, .ae-mark .ae-trace { animation: none; }
   .ae-panel, .ae-backdrop { animation: none; }
-  .ae-ring { animation: none; }
+  .ae-ring i { animation: none; }
 }
