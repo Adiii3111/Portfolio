@@ -8,9 +8,9 @@ const topics = ["Full-time role", "Collaboration", "Research", "AgileFlowSprinte
 
 /**
  * Opens an on-page "start a conversation" panel. The site has no backend, so a
- * message is sent through the visitor's own mail (Gmail / Outlook web, or their
- * mail app), pre-filled and addressed to Aditya — with LinkedIn and copy-email
- * as alternatives.
+ * message is sent through the visitor's own mail (Gmail / Outlook web),
+ * pre-filled and addressed to Aditya — with LinkedIn, phone and copy-email as
+ * alternatives.
  */
 export default function ContactLauncher({ className, children }: { className?: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -36,7 +36,6 @@ export default function ContactLauncher({ className, children }: { className?: s
   const enc = encodeURIComponent;
   const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${enc(person.email)}&su=${enc(subject)}&body=${enc(body)}`;
   const outlook = `https://outlook.live.com/mail/0/deeplink/compose?to=${enc(person.email)}&subject=${enc(subject)}&body=${enc(body)}`;
-  const mailto = `mailto:${person.email}?subject=${enc(subject)}&body=${enc(body)}`;
 
   const copy = async (text: string, label: string) => {
     try { await navigator.clipboard.writeText(text); setCopied(label); setTimeout(() => setCopied(""), 2000); } catch { setCopied("Copy failed — select the text instead"); }
@@ -71,8 +70,8 @@ export default function ContactLauncher({ className, children }: { className?: s
                 <div className="cl-options">
                   <a href={gmail} target="_blank" rel="noreferrer" className="cl-option"><b>Gmail</b><span>Opens a ready-to-send email in your browser</span></a>
                   <a href={outlook} target="_blank" rel="noreferrer" className="cl-option"><b>Outlook</b><span>Opens a ready-to-send email in Outlook on the web</span></a>
-                  <a href={mailto} className="cl-option"><b>Mail app</b><span>Uses your computer’s default email app</span></a>
                   <a href={person.linkedin} target="_blank" rel="noreferrer" className="cl-option"><b>LinkedIn</b><span>Message me directly on LinkedIn</span></a>
+                  <a href={person.phoneHref} className="cl-option"><b>Phone</b><span>Call or text {person.phone}</span></a>
                 </div>
                 <div className="cl-copy">
                   <button type="button" onClick={() => copy(`${subject}\n\n${body}`, "Message copied")}>Copy message</button>

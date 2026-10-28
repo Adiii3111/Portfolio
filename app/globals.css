@@ -227,6 +227,7 @@ html[data-intro="done"] .intro { display: none; }
 .site-menu a { display: flex; align-items: baseline; gap: 18px; padding: 10px 0; border-bottom: 1px solid var(--rule); font: 500 clamp(26px, 6vw, 40px)/1.15 var(--serif); }
 .site-menu a span { font: 600 11px/1 var(--sans); letter-spacing: .2em; color: var(--accent); }
 .site-menu a[aria-current] { color: var(--accent); }
+.menu-connect { margin-top: 28px; }
 .site-menu p { margin-top: 30px; font-size: 13px; color: var(--muted); }
 
 .chapter-rail { position: fixed; right: 22px; top: 50%; z-index: 80; display: none; flex-direction: column; gap: 4px; transform: translateY(-50%); }
@@ -636,6 +637,19 @@ html[data-intro="done"] .intro { display: none; }
 .cl-back { margin-top: 20px; font-size: 12px; color: var(--stone); }
 .cl-back:hover { color: var(--ivory); }
 @media (max-width: 560px) { .cl-row, .cl-options { grid-template-columns: 1fr; } }
+/* Header "Connect": direct LinkedIn / email / phone, no form. */
+.qc-panel { width: min(480px, 100%); }
+.qc-list { display: grid; gap: 12px; }
+.qc-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid #F4F0E822; border-radius: 12px; background: #F4F0E808; transition: border-color .25s, background .25s; }
+.qc-item:hover { border-color: var(--gold); background: #C5A57214; }
+.qc-main { display: grid; flex: 1; min-width: 0; gap: 2px; }
+.qc-main b { font: 500 22px/1.1 var(--serif); }
+.qc-main span { overflow-wrap: anywhere; font-size: 13px; color: var(--stone); }
+.qc-copy { flex: none; padding-bottom: 3px; border-bottom: 1px solid #F4F0E855; font-size: 12px; font-weight: 600; letter-spacing: .06em; }
+.qc-copy:hover { color: var(--gold-light); border-color: var(--gold); }
+.qc-status { min-height: 18px; margin-top: 12px; font-size: 12px; color: var(--gold-light); }
+.qc-more { margin-top: 6px; font-size: 12px; color: var(--stone); }
+.qc-more:hover { color: var(--ivory); }
 
 /* ═════════════════════ Motion ═════════════════════ */
 @keyframes draw { to { stroke-dashoffset: 0; } }

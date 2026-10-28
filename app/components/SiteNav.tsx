@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import TimeKeys from "./TimeKeys";
 import Monogram from "./Monogram";
 import { person, sections } from "../content";
-import ContactLauncher from "./ContactLauncher";
+import QuickConnect from "./QuickConnect";
 
 const headerLinks = ["about", "journey", "experience", "work", "research", "lab", "contact"];
 
@@ -64,7 +64,7 @@ export default function SiteNav() {
           })}
         </nav>
         <TimeKeys />
-        <ContactLauncher className="header-cta">Connect</ContactLauncher>
+        <QuickConnect className="header-cta">Connect</QuickConnect>
         <button className="menu-toggle" aria-expanded={open} aria-controls="site-menu" onClick={() => setOpen(!open)}>
           <span>{open ? "Close" : "Menu"}</span>
         </button>
@@ -80,6 +80,7 @@ export default function SiteNav() {
             </li>
           ))}
         </ol>
+        <QuickConnect className="btn btn-gold menu-connect" onOpen={() => setOpen(false)}>Connect</QuickConnect>
         <p>{person.email}<br />{person.collegeEmail}</p>
       </div>
 

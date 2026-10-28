@@ -42,7 +42,7 @@ type Chapter = { when: string; place: string; kind: string; title: string; body:
 type Role = { year: string; org: string; role: string; bullets: string[]; tags: string[] };
 type Project = { id: string; title: string; category: string; year: string; context: string; challenge: string; role: string; tools: string[]; outcome?: string; caseStudy: string[] };
 export type KB = {
-  person: { fullName: string; roles: readonly string[] | string[]; email: string; collegeEmail: string; linkedin: string };
+  person: { fullName: string; roles: readonly string[] | string[]; email: string; collegeEmail: string; phone: string; linkedin: string };
   chapters: Chapter[];
   vaxxinova: { highlights: { value: string; label: string }[]; bullets: string[]; tools: string[] };
   mercuryCapabilities: string[];
@@ -223,7 +223,7 @@ export function buildIndex(kb: KB): Index {
   recommendations.forEach((r, i) => add({ id: `rec${i}`, topic: "recs", kind: "quote", section: "#recommendations", find: r.name, text: `${r.name}, ${r.title}: “${r.quote}”` }));
   recommendations.forEach((r, i) => add({ id: `rec${i}-c`, topic: "recs", kind: "quote", section: "#recommendations", find: r.name, text: `${r.name} ${lc(endDot(r.context))}` }));
 
-  add({ id: "contact", topic: "contact", kind: "contact", section: "#contact", text: `You can reach Aditya at ${person.email} (personal) or ${person.collegeEmail} (Northeastern), or on LinkedIn: ${person.linkedin}` });
+  add({ id: "contact", topic: "contact", kind: "contact", section: "#contact", text: `You can reach Aditya at ${person.email} (personal) or ${person.collegeEmail} (Northeastern), by phone at ${person.phone}, or on LinkedIn: ${person.linkedin}` });
   const next = chapters.find((c) => c.kind === "Next");
   if (next) add({ id: "avail", topic: "availability", kind: "availability", section: "#contact", text: `Yes — Aditya is ${lc(next.body.replace(/^Exploring/, "exploring"))}` });
   if (ms) add({ id: "loc", topic: "location", kind: "location", section: "#journey", text: `Aditya is based in ${ms.place}, studying at ${ms.title}; he is from ${be?.place ?? "Bengaluru, India"}, and his co-op took him to Willmar, Minnesota.` });
@@ -438,7 +438,7 @@ export function ask(question: string, idx: Index, ctx: Context): Answer {
   if (is("greet") && it.length === 1) return { lead: "Hello — I’m AETERNUS. I know everything on Aditya’s portfolio: his co-op at Vaxxinova, his blood supply chain research, his projects, tools, education and leadership. What would you like to know?", bullets: [], links: [], suggestions: SUGGEST.default };
   if (is("thanks") && it.length === 1) return { lead: "You’re welcome. If you’d like to talk to Aditya directly, his email is below.", bullets: [], links: [{ label: "Contact", section: "#contact" }], email: true, suggestions: SUGGEST.contact };
 
-  if (is("phone")) return { lead: "Aditya’s phone number isn’t shared on this site — email is the best way to reach him.", bullets: byId(idx, "contact").map((p) => p.text), links: [{ label: "Contact", section: "#contact" }], email: true, suggestions: SUGGEST.contact };
+  if (is("phone")) return { lead: `You can call or text Aditya at ${kb.person.phone}.`, bullets: byId(idx, "contact").map((p) => p.text), links: [{ label: "Contact", section: "#contact" }], email: true, suggestions: SUGGEST.contact };
   if (is("age") || is("personal")) return { lead: "That isn’t something this portfolio covers — it sticks to Aditya’s work, research and community.", bullets: [], links: [], email: true, suggestions: SUGGEST.default, unknown: true };
   if (is("salary")) return { lead: "Compensation isn’t discussed on this site — that’s a conversation to have with Aditya directly.", bullets: [], links: [{ label: "Contact", section: "#contact" }], email: true, suggestions: SUGGEST.availability, unknown: true };
   if (is("visa")) return { lead: "Work authorization isn’t covered on this site, so I can’t answer that — please ask Aditya directly.", bullets: byId(idx, "avail").map((p) => p.text), links: [{ label: "Contact", section: "#contact" }], email: true, suggestions: SUGGEST.availability, unknown: true };

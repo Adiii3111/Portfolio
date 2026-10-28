@@ -7,6 +7,8 @@ export const person = {
   roles: ["Engineer", "Researcher", "Analyst", "Builder", "Runner"],
   email: "adityasripad3111@gmail.com",
   collegeEmail: "kadlabalsripad.a@northeastern.edu",
+  phone: "+1 857-376-7415",
+  phoneHref: "tel:+18573767415",
   linkedin: "https://www.linkedin.com/in/adityakadlabalsripad/",
 };
 
