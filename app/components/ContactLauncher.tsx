@@ -9,7 +9,7 @@ const topics = ["Full-time role", "Collaboration", "Research", "AgileFlowSprinte
 /**
  * Opens an on-page "start a conversation" panel. The site has no backend, so a
  * message is sent through the visitor's own mail (Gmail / Outlook web),
- * pre-filled and addressed to Aditya — with LinkedIn, phone and copy-email as
+ * pre-filled and addressed to Aditya — with LinkedIn and phone as
  * alternatives.
  */
 export default function ContactLauncher({ className, children }: { className?: string; children: React.ReactNode }) {
@@ -74,11 +74,7 @@ export default function ContactLauncher({ className, children }: { className?: s
                   <a href={person.linkedin} target="_blank" rel="noreferrer" className="cl-option" onClick={() => copy(`${subject}\n\n${body}`, "Your message is copied — press Message on LinkedIn and paste it")}><b>LinkedIn</b><span>Message me on LinkedIn</span></a>
                   <a href={person.phoneHref} className="cl-option"><b>Phone</b><span>Call or text {person.phone}</span></a>
                 </div>
-                <div className="cl-copy">
-                  <button type="button" onClick={() => copy(`${subject}\n\n${body}`, "Message copied")}>Copy message</button>
-                  <button type="button" onClick={() => copy(person.email, "Email copied")}>Copy {person.email}</button>
-                  <span aria-live="polite">{copied}</span>
-                </div>
+                <p className="cl-copy" aria-live="polite">{copied}</p>
                 <button type="button" className="cl-back" onClick={() => setStep("write")}>← Edit message</button>
               </div>
             )}

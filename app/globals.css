@@ -640,10 +640,7 @@ html[data-intro="done"] .intro { display: none; }
 .cl-option:hover { border-color: var(--gold); background: #C5A57214; transform: translateY(-2px); }
 .cl-option b { font: 500 22px/1.1 var(--serif); }
 .cl-option span { font-size: 12px; color: var(--stone); white-space: nowrap; }
-.cl-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 18px; }
-.cl-copy button { padding-bottom: 3px; border-bottom: 1px solid #F4F0E855; font-size: 12px; font-weight: 600; letter-spacing: .06em; }
-.cl-copy button:hover { color: var(--gold-light); border-color: var(--gold); }
-.cl-copy span { font-size: 12px; color: var(--gold-light); }
+.cl-copy { min-height: 1.4em; margin: 14px 0 0; font-size: 12px; color: var(--gold-light); }
 .cl-back { margin-top: 20px; font-size: 12px; color: var(--stone); }
 .cl-back:hover { color: var(--ivory); }
 @media (max-width: 680px) { .cl-options { grid-template-columns: 1fr; } }
