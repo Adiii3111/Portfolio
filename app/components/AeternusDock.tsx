@@ -123,9 +123,8 @@ export default function AeternusDock() {
           <span className="ae-halo" aria-hidden="true" />
           <div className="ae-nudge">
             <button type="button" className="ae-nudge-ask" onClick={() => { setSeed({ q: teaser.q, n: Date.now() }); setTab("ask"); launch(); }} aria-label={`Ask AETERNUS: ${teaser.q}`}>
-              <span className="ae-nudge-kicker">AETERNUS · your guide to Aditya</span>
+              <span className="ae-nudge-kicker" aria-hidden="true">Ask me</span>
               <span className="ae-nudge-q" aria-hidden="true">{teaser.typed}<i className="ae-caret" /></span>
-              <span className="ae-nudge-cta" aria-hidden="true">Tap to ask →</span>
             </button>
             <button type="button" className="ae-nudge-x" onClick={retireNudge} aria-label="Dismiss">✕</button>
           </div>

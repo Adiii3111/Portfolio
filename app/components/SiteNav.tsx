@@ -18,9 +18,11 @@ export default function SiteNav() {
   useEffect(() => {
     let lastY = window.scrollY;
     const onScroll = () => {
-      // The ambulance faces the way the page is moving: right going down, left coming back up.
+      // The ambulance faces the way the page is moving: right going down, left coming back up,
+      // and turns back round to face the road ahead once it's home at the top.
       const y = window.scrollY;
-      if (y !== lastY) setReverse(y < lastY);
+      if (y <= 0) setReverse(false);
+      else if (y !== lastY) setReverse(y < lastY);
       lastY = y;
       setScrolled(y > 24);
       setProgress(window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight));
