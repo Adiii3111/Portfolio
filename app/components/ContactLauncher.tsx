@@ -68,10 +68,10 @@ export default function ContactLauncher({ className, children }: { className?: s
               <div className="cl-send">
                 <p className="cl-preview"><strong>{subject}</strong><br />{message.length > 140 ? message.slice(0, 140) + "…" : message}</p>
                 <div className="cl-options">
-                  <a href={gmail} target="_blank" rel="noreferrer" className="cl-option"><b>Gmail</b></a>
-                  <a href={outlook} target="_blank" rel="noreferrer" className="cl-option"><b>Outlook</b></a>
+                  <a href={gmail} target="_blank" rel="noreferrer" className="cl-option"><b>Gmail</b><span>Write to {person.email}</span></a>
+                  <a href={outlook} target="_blank" rel="noreferrer" className="cl-option"><b>Outlook</b><span>Send from your Outlook account</span></a>
                   {/* LinkedIn can't be opened with a message filled in, so the message is copied as they click: on the profile they only press Message and paste. */}
-                  <a href={person.linkedin} target="_blank" rel="noreferrer" className="cl-option" onClick={() => copy(`${subject}\n\n${body}`, "Your message is copied — press Message on LinkedIn and paste it")}><b>LinkedIn</b></a>
+                  <a href={person.linkedin} target="_blank" rel="noreferrer" className="cl-option" onClick={() => copy(`${subject}\n\n${body}`, "Your message is copied — press Message on LinkedIn and paste it")}><b>LinkedIn</b><span>Message me on LinkedIn</span></a>
                   <a href={person.phoneHref} className="cl-option"><b>Phone</b><span>Call or text {person.phone}</span></a>
                 </div>
                 <div className="cl-copy">
