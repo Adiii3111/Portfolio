@@ -33,7 +33,7 @@ function jumpTo(section: string, find?: string) {
   }, 60);
 }
 
-export default function AeternusAsk({ onMatchRole }: { onMatchRole?: () => void }) {
+export default function AeternusAsk({ onMatchRole, seed }: { onMatchRole?: () => void; seed?: { q: string; n: number } }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -66,6 +66,9 @@ export default function AeternusAsk({ onMatchRole }: { onMatchRole?: () => void 
       input.current?.focus({ preventScroll: true });
     }, delay);
   };
+
+  // A question picked from the launcher's teaser is asked as soon as the panel opens.
+  useEffect(() => { if (seed) send(seed.q); }, [seed?.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const last = [...msgs].reverse().find((m) => m.answer)?.answer;
   const chips = msgs.length ? last?.suggestions ?? [] : STARTERS;

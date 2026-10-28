@@ -13,10 +13,16 @@ export default function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [reverse, setReverse] = useState(false);
 
   useEffect(() => {
+    let lastY = window.scrollY;
     const onScroll = () => {
-      setScrolled(window.scrollY > 24);
+      // The ambulance faces the way the page is moving: right going down, left coming back up.
+      const y = window.scrollY;
+      if (y !== lastY) setReverse(y < lastY);
+      lastY = y;
+      setScrolled(y > 24);
       setProgress(window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight));
     };
     onScroll();
@@ -52,7 +58,7 @@ export default function SiteNav() {
       <div className="tracker" aria-hidden="true">
         {/* ECG trace fills in as you scroll; the ambulance rides the leading edge. */}
         <span className="tracker-fill" style={{ clipPath: `inset(0 ${(1 - progress) * 100}% 0 0)` }} />
-        <span className="tracker-ambulance" style={{ left: `calc(${progress * 100}% - ${progress * 20}px)` }}>
+        <span className={`tracker-ambulance ${reverse ? "is-reverse" : ""}`} style={{ left: `calc(${progress * 100}% - ${progress * 20}px)` }}>
           <svg viewBox="0 0 20 12">
             <path className="amb-body" d="M1 9.5V3.2C1 2.5 1.5 2 2.2 2H12v7.5ZM12 4h3.4l2.8 3v2.5H12Z" />
             <path className="amb-cross" d="M6.5 3.6v4M4.5 5.6h4" />

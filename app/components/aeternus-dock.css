@@ -12,6 +12,26 @@
 .ae-inf { display: block; color: var(--accent); }
 .ae-mark { width: 44px; height: 44px; }
 
+/* Nudge: until someone opens AETERNUS, a light runs round the launcher and a card beside it
+   types out questions it can answer. Pressing the card asks the one showing. */
+@property --ae-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.ae-halo { position: fixed; right: 16px; bottom: 16px; z-index: 139; width: 72px; height: 72px; pointer-events: none; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); background: conic-gradient(from var(--ae-a), transparent 0 62%, color-mix(in srgb, var(--accent) 60%, transparent) 80%, var(--accent) 88%, transparent 92%); animation: ae-orbit 2.4s linear infinite, ae-fade .6s ease; }
+.ae-nudge { position: fixed; right: 96px; bottom: 22px; z-index: 140; display: flex; align-items: stretch; max-width: min(320px, calc(100vw - 120px)); filter: drop-shadow(0 14px 28px #0008); animation: ae-nudge-in .55s var(--ease) both; }
+.ae-nudge-ask { display: grid; gap: 6px; min-width: 0; padding: 11px 14px 10px 16px; text-align: left; color: var(--fg); background: linear-gradient(135deg, color-mix(in srgb, var(--bg) 80%, #000), var(--bg)); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-right: 0; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); transition: border-color .25s; }
+.ae-nudge-ask:hover { border-color: var(--accent); }
+.ae-nudge-ask:hover .ae-nudge-cta { color: var(--accent); }
+.ae-nudge-kicker { font: 700 9.5px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--accent); }
+.ae-nudge-q { min-height: 1.35em; font: 500 14px/1.35 var(--sans); }
+.ae-caret { display: inline-block; width: 1.5px; height: 1em; margin-left: 2px; vertical-align: -2px; background: var(--accent); animation: ae-blink 1s steps(1) infinite; }
+.ae-nudge-cta { font: 600 11px/1 var(--sans); letter-spacing: .06em; color: var(--muted); transition: color .25s; }
+.ae-nudge-x { padding: 0 10px; font-size: 11px; color: var(--muted); background: color-mix(in srgb, var(--bg) 88%, #000); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); transition: color .25s; }
+.ae-nudge-x:hover { color: var(--fg); }
+/* A small pointer from the card to the launcher. */
+.ae-nudge::after { content: ""; position: absolute; right: -7px; top: 50%; width: 8px; height: 12px; transform: translateY(-50%); background: color-mix(in srgb, var(--accent) 60%, transparent); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+@keyframes ae-orbit { to { --ae-a: 360deg; } }
+@keyframes ae-blink { 50% { opacity: 0; } }
+@keyframes ae-nudge-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+
 /* Launch: the mark flies from its corner to the centre and grows, the name opens out letter
    by letter beneath it, the tagline follows, and the whole thing hands over to the panel. */
 .ae-ls { position: fixed; inset: 0; z-index: 147; display: grid; place-content: center; justify-items: center; gap: 18px; animation: ae-ls-out .25s ease 1.3s forwards; }
@@ -54,6 +74,9 @@ html.aeternus-open { overflow: hidden; }
 
 @media (max-width: 560px) {
   .ae-launch { right: 12px; bottom: 12px; padding: 8px 10px 8px 8px; }
+  .ae-halo { right: 6px; bottom: 6px; width: 74px; }
+  .ae-nudge { right: 88px; bottom: 12px; max-width: calc(100vw - 104px); }
+  .ae-nudge-q { font-size: 13px; }
   .ae-panel { top: auto; bottom: 0; left: 0; width: 100%; max-height: 92svh; transform: none; clip-path: none; padding: 1px 0 0; animation: ae-up .35s var(--ease); }
   .ae-inner { clip-path: none; }
   .ae-bar { flex-wrap: wrap; padding: 12px 14px; gap: 10px; }
@@ -66,4 +89,5 @@ html.aeternus-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .ae-launch::before, .ae-mark .ae-trace { animation: none; }
   .ae-panel, .ae-backdrop { animation: none; }
+  .ae-halo, .ae-nudge, .ae-caret { animation: none; }
 }
