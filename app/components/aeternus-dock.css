@@ -1,7 +1,7 @@
 /* AETERNUS dock — every class is prefixed ae- */
 
 /* Launcher: just the infinity mark on an angular, machined plate. */
-.ae-launch { position: fixed; right: 22px; bottom: 22px; z-index: 140; isolation: isolate; display: flex; align-items: center; padding: 8px; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); background: color-mix(in srgb, var(--accent) 55%, transparent); color: var(--fg); filter: drop-shadow(0 16px 30px #0009); transition: transform .35s var(--ease), background .3s; }
+.ae-launch { position: fixed; right: 30px; bottom: 30px; z-index: 140; isolation: isolate; display: flex; align-items: center; padding: 8px; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); background: color-mix(in srgb, var(--accent) 55%, transparent); color: var(--fg); filter: drop-shadow(0 16px 30px #0009); transition: transform .35s var(--ease), background .3s; }
 /* 1px machined edge: the plate sits inside a slightly larger chamfered outline. */
 .ae-launch::after { content: ""; position: absolute; inset: 1px; z-index: -2; clip-path: polygon(11.5px 0, 100% 0, 100% calc(100% - 11.5px), calc(100% - 11.5px) 100%, 0 100%, 0 11.5px); background: linear-gradient(135deg, color-mix(in srgb, var(--bg) 70%, #000), var(--bg)); }
 .ae-launch::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 70%); background-size: 250% 100%; animation: ae-sweep 4.5s ease-in-out infinite; pointer-events: none; z-index: -1; }
@@ -12,23 +12,11 @@
 .ae-inf { display: block; color: var(--accent); }
 .ae-mark { width: 44px; height: 44px; }
 
-/* Nudge: until someone opens AETERNUS, a light runs round the launcher and a card beside it
-   types out questions it can answer. Pressing the card asks the one showing. */
-@property --ae-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-.ae-halo { position: fixed; right: 16px; bottom: 16px; z-index: 139; width: 72px; height: 72px; pointer-events: none; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); background: conic-gradient(from var(--ae-a), transparent 0 62%, color-mix(in srgb, var(--accent) 60%, transparent) 80%, var(--accent) 88%, transparent 92%); animation: ae-orbit 2.4s linear infinite, ae-fade .6s ease; }
-.ae-nudge { position: fixed; right: 92px; bottom: 37px; z-index: 140; display: flex; align-items: stretch; height: 30px; max-width: min(270px, calc(100vw - 116px)); filter: drop-shadow(0 8px 16px #0006); animation: ae-nudge-in .5s var(--ease) both; }
-.ae-nudge-ask { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 8px 0 11px; color: var(--fg); background: color-mix(in srgb, var(--bg) 88%, #000); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-right: 0; clip-path: polygon(7px 0, 100% 0, 100% 100%, 0 100%, 0 7px); transition: border-color .25s; }
-.ae-nudge-ask:hover { border-color: var(--accent); }
-.ae-nudge-kicker { flex: none; font: 700 9px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
-.ae-nudge-q { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 12px/1 var(--sans); }
-.ae-caret { display: inline-block; width: 1.5px; height: 1em; margin-left: 2px; vertical-align: -2px; background: var(--accent); animation: ae-blink 1s steps(1) infinite; }
-.ae-nudge-x { padding: 0 8px; font-size: 9px; color: var(--muted); background: color-mix(in srgb, var(--bg) 88%, #000); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-left: 0; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%); transition: color .25s; }
-.ae-nudge-x:hover { color: var(--fg); }
-/* A small pointer from the chip to the launcher. */
-.ae-nudge::after { content: ""; position: absolute; right: -6px; top: 50%; width: 6px; height: 10px; transform: translateY(-50%); background: color-mix(in srgb, var(--accent) 60%, transparent); clip-path: polygon(0 0, 100% 50%, 0 100%); }
-@keyframes ae-orbit { to { --ae-a: 360deg; } }
-@keyframes ae-blink { 50% { opacity: 0; } }
-@keyframes ae-nudge-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+/* Ring: "Ask me about Aditya" turns slowly round the launcher, like the hero portrait's ring.
+   It sits in the launcher's own corner (centred on it), so it never covers the page. */
+.ae-ring { position: fixed; right: 8px; bottom: 8px; z-index: 139; width: 104px; height: 104px; pointer-events: none; overflow: visible; animation: spin 22s linear infinite; transition: opacity .3s; }
+.ae-ring text { font: 700 8.4px/1 var(--sans); fill: var(--accent); paint-order: stroke; stroke: var(--bg); stroke-width: 2.4px; stroke-linejoin: round; }
+.ae-ring.is-open { opacity: 0; }
 
 /* Launch: the mark flies from its corner to the centre and grows, the name opens out letter
    by letter beneath it, the tagline follows, and the whole thing hands over to the panel. */
@@ -71,9 +59,7 @@ html.aeternus-open { overflow: hidden; }
 @keyframes ae-in { from { opacity: 0; transform: translate(-50%, calc(-50% + 18px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
 
 @media (max-width: 560px) {
-  .ae-launch { right: 12px; bottom: 12px; padding: 8px 10px 8px 8px; }
-  .ae-halo { right: 6px; bottom: 6px; width: 74px; }
-  .ae-nudge { right: 84px; bottom: 27px; max-width: calc(100vw - 100px); }
+  .ae-launch { right: 30px; bottom: 30px; }
   .ae-panel { top: auto; bottom: 0; left: 0; width: 100%; max-height: 92svh; transform: none; clip-path: none; padding: 1px 0 0; animation: ae-up .35s var(--ease); }
   .ae-inner { clip-path: none; }
   .ae-bar { flex-wrap: wrap; padding: 12px 14px; gap: 10px; }
@@ -86,5 +72,5 @@ html.aeternus-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .ae-launch::before, .ae-mark .ae-trace { animation: none; }
   .ae-panel, .ae-backdrop { animation: none; }
-  .ae-halo, .ae-nudge, .ae-caret { animation: none; }
+  .ae-ring { animation: none; }
 }
