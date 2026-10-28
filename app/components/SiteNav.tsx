@@ -50,8 +50,18 @@ export default function SiteNav() {
   return (
     <>
       <div className="tracker" aria-hidden="true">
-        <span className="tracker-fill" style={{ transform: `scaleX(${progress})` }} />
-        <span className="tracker-vial" style={{ left: `${progress * 100}%` }}><svg viewBox="0 0 12 24"><path d="M3 1h6M4 1v16a2 2 0 0 0 4 0V1" /><path className="tracker-blood" d="M4 10h4v7a2 2 0 0 1-4 0Z" /></svg></span>
+        {/* ECG trace fills in as you scroll; the ambulance rides the leading edge. */}
+        <span className="tracker-fill" style={{ clipPath: `inset(0 ${(1 - progress) * 100}% 0 0)` }} />
+        <span className="tracker-ambulance" style={{ left: `calc(${progress * 100}% - ${progress * 20}px)` }}>
+          <svg viewBox="0 0 20 12">
+            <path className="amb-body" d="M1 9.5V3.2C1 2.5 1.5 2 2.2 2H12v7.5ZM12 4h3.4l2.8 3v2.5H12Z" />
+            <path className="amb-cross" d="M6.5 3.6v4M4.5 5.6h4" />
+            <path className="amb-window" d="M13 5h2l1.8 2H13Z" />
+            <circle className="amb-wheel" cx="4.5" cy="10" r="1.5" />
+            <circle className="amb-wheel" cx="15" cy="10" r="1.5" />
+            <rect className="amb-siren" x="9" y="0.6" width="2" height="1.4" rx=".4" />
+          </svg>
+        </span>
       </div>
       <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
         <a className="brand" href="#top" aria-label={`${person.fullName} — back to top`}>
