@@ -277,6 +277,7 @@ export default function Home() {
           <dl className="contact-emails reveal">
             <div><dt>Personal</dt><dd><a href={`mailto:${person.email}`}>{person.email}</a></dd></div>
             <div><dt>Northeastern</dt><dd><a href={`mailto:${person.collegeEmail}`}>{person.collegeEmail}</a></dd></div>
+            <div><dt>Phone</dt><dd><a href={person.phoneHref}>{person.phone}</a></dd></div>
           </dl>
           <footer className="footer">
             <span>© 2026 {person.fullName}</span>
